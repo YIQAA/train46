@@ -1,0 +1,80 @@
+package com.qdu.controller.AI;
+
+import com.qdu.utils.LoggingAdvisor;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import java.time.LocalDate;
+
+/**
+ * 控制器类，处理与AI聊天相关的请求
+ */
+@RestController
+@CrossOrigin
+@RequestMapping("/api/AIchat-service")
+public class OpenAiController  {
+
+    // 聊天客户端对象，用于与AI模型进行交互
+    private final ChatClient chatClient;
+
+    /**
+     * 构造函数，初始化聊天客户端
+     * @param chatClientBuilder 聊天客户端构建器
+     * @param chatMemory 聊天记忆对象，用于存储聊天上下文
+     * @param vectorStore 向量存储对象，用于存储文本的向量表示
+     */
+    public OpenAiController(ChatClient.Builder chatClientBuilder, ChatMemory chatMemory, VectorStore vectorStore) {
+        // 设置系统提示信息，告知AI模型的角色和任务
+        this.chatClient = chatClientBuilder.defaultSystem(
+                        "您是火车订票系统的客户聊天支持代理。请以友好、乐于助人且愉快的方式来回复。\n" +
+                                "您正在通过在线聊天系统与客户互动。\n" +
+                                "在提供查询车票列表之前，您必须始终\n" +
+                                "从用户处获取以下信息：出发城市、目的城市、出发日期。\n" +
+                                "在询问用户之前，请检查消息历史记录以获取此信息。\n" +
+                                "在订票之前，请先获取车次信息及乘客姓名、证件号等并且用户确定之后才进行订票。\n" +
+                                "请讲中文。\n" +
+                                "今天的日期是 {current_date}.\n"
+                )
+
+                // 添加默认的顾问，用于处理聊天请求和响应
+                .defaultAdvisors(
+                        // 聊天记忆顾问，用于从聊天记忆中获取上下文信息
+                        new PromptChatMemoryAdvisor(chatMemory),
+                        // 日志顾问，用于记录聊天请求信息
+                        new LoggingAdvisor(),
+                        // 问答顾问，用于从向量存储中检索相关信息
+                        new QuestionAnswerAdvisor(vectorStore, SearchRequest.defaults()) // RAG
+                )
+                // 设置可用的函数，AI模型可以调用这些函数来执行特定任务
+                .defaultFunctions("listTicketPageQueryForAI")
+                .build();
+    }
+
+    /**
+     * 处理用户的聊天请求，返回AI生成的响应流
+     * @param message 用户输入的消息，默认为“讲个笑话”
+     * @return AI生成的响应流
+     */
+    @CrossOrigin
+    @GetMapping(value = "/generateStreamAsString", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> generateStreamAsString(@RequestParam(value = "message", defaultValue = "讲个笑话") String message) {
+        // 构建聊天请求，包括用户消息、系统提示信息和顾问参数
+        Flux<String> content = this.chatClient.prompt()
+                .user(message)
+                .system(promptSystemSpec -> promptSystemSpec.param("current_date", LocalDate.now().toString()))
+                .advisors(advisorSpec -> advisorSpec.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY,100))
+                // 发送请求并获取响应流
+                .stream()
+                .content();
+        // 在响应流末尾添加[complete]表示响应结束
+        return content.concatWith(Flux.just("[complete]"));
+    }
+}

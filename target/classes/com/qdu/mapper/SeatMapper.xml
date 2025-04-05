@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qdu.mapper.SeatMapper">
+
+
+
+    <select id="selectAvailableSeats" resultType="com.qdu.dto.domain.TrainSeatsDTO">
+        WITH seat_config_split AS (
+            SELECT
+                numbers.n AS type_id,
+                SUBSTRING_INDEX(SUBSTRING_INDEX(CONCAT(dt.seat_config, ',0,0,0,0,0,0,0,0'), ',', numbers.n), ',', -1) + 0 AS carriage_count
+            FROM daily_train dt
+                     JOIN (
+                WITH RECURSIVE numbers AS (
+                    SELECT 1 AS n
+                    UNION ALL
+                    SELECT n + 1 FROM numbers WHERE 9 > n
+                )
+                SELECT n FROM numbers
+            ) numbers ON 1=1
+            WHERE dt.train_id = #{trainId}
+        ),
+             seat_info AS (
+                 SELECT
+                     sc.type_id,
+                     sc.seats_per_carriage,
+                     sc.base_price,
+                     sss.carriage_count,
+                     (sss.carriage_count * sc.seats_per_carriage) AS total_seats
+                 FROM seat_config_split sss
+                          INNER JOIN seat_config sc ON sc.type_id = sss.type_id
+                 WHERE sss.carriage_count > 0
+             ),
+             occupied_counts AS (
+                 SELECT
+                     seat_type_id AS type_id,
+                     COUNT(*) AS occupied_seats
+                 FROM seat
+                 WHERE
+                     train_id = #{trainId}
+                   AND status != 'available'  -- 根据状态过滤不可用座位
+        GROUP BY seat_type_id
+            )
+        SELECT
+            si.type_id AS `type`,
+            (si.total_seats - COALESCE(oc.occupied_seats, 0)) AS quantity,
+            (si.base_price * #{mileage}) AS price
+        FROM seat_info si
+                 LEFT JOIN occupied_counts oc ON si.type_id = oc.type_id
+        HAVING quantity > 0
+    </select>
+    <select id="selectAvailableSeatIds" resultType="java.lang.Integer">
+        SELECT s.seat_id
+        FROM seat s
+        INNER JOIN (
+        SELECT
+        train_id,
+        carriage_number,
+        SUBSTRING(seat_number, 1, LENGTH(seat_number) - 1) AS row_num
+        FROM seat
+        WHERE seat_type_id = #{seatType}
+        AND status = 'available'
+        AND train_id = #{trainId}  -- 新增train_id条件
+        AND RIGHT(seat_number, 1) IN
+        <foreach collection="letters" item="letter" open="(" separator="," close=")">
+            #{letter}
+        </foreach>
+        GROUP BY train_id, carriage_number, row_num
+        HAVING COUNT(DISTINCT RIGHT(seat_number, 1)) = #{seatCount}
+        ORDER BY
+        CAST(carriage_number AS UNSIGNED),
+        CAST(SUBSTRING(seat_number, 1, LENGTH(seat_number)-1) AS UNSIGNED)
+        LIMIT 1
+        ) AS grouped
+        ON s.train_id = grouped.train_id      -- 确保关联相同车次
+        AND s.carriage_number = grouped.carriage_number
+        AND SUBSTRING(s.seat_number, 1, LENGTH(s.seat_number) - 1) = grouped.row_num
+        AND RIGHT(s.seat_number, 1) IN
+        <foreach collection="letters" item="letter" open="(" separator="," close=")">
+            #{letter}
+        </foreach>
+        WHERE s.status = 'available'
+    </select>
+    <select id="selectRandomAvailableSeats" resultType="java.lang.Integer">
+        SELECT seat_id
+        FROM seat
+        WHERE
+            train_id = #{trainId}
+          AND seat_type_id = #{seatType}
+          AND status = 'available'
+        ORDER BY
+            CAST(carriage_number AS UNSIGNED),  -- 按车厢号升序
+            CAST(SUBSTRING(seat_number, 1, LENGTH(seat_number)-1) AS UNSIGNED), -- 按排号升序
+            RIGHT(seat_number, 1)  -- 按座位字母升序
+            LIMIT #{count}
+    </select>
+    <select id="selectSeatPriceByType" resultType="java.lang.Double">
+        SELECT base_price from seat_config where type_id = #{seatType}
+    </select>
+    <update id="lockSeatsByIds">
+        UPDATE seat
+        SET status = 'locked'
+        WHERE seat_id IN
+        <foreach collection="seatIds" item="seatId" open="(" separator="," close=")">
+            #{seatId}
+        </foreach>
+        AND status = 'available'
+        AND train_id = #{trainId}  -- 新增车次校验
+    </update>
+</mapper>

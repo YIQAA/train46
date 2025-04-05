@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qdu.mapper.TrainMapper">
+
+<!--    获取满足两个车站的所有列车号-->
+    <select id="getTrainNumbersBetweenCities" resultType="java.lang.String">
+        SELECT DISTINCT tb.train_number
+        FROM train tb
+        WHERE EXISTS (
+            SELECT 1
+            FROM route r1
+                     INNER JOIN route r2 ON r1.train_number = r2.train_number
+            WHERE r1.train_number = tb.train_number
+              AND r1.station_sequence &lt; r2.station_sequence
+              AND r1.station_id IN (
+                SELECT station_id FROM station
+                WHERE city_code = #{departureCity}
+            )
+              AND r2.station_id IN (
+                SELECT station_id FROM station
+                WHERE city_code = #{arrivalCity}
+            )
+        )
+    </select>
+
+    <select id="getTrainByNumber" resultType="com.qdu.entity.Train">
+        SELECT *
+        FROM train
+        WHERE train_number = #{trainNumber}
+    </select>
+    <select id="findTrainsByCities" resultType="com.qdu.dto.domain.TrainInfo">
+        SELECT
+            t.train_number AS trainNumber,
+            t.train_type AS trainType,
+            s_dep.station_name AS departureStation,
+            s_arr.station_name AS arrivalStation,
+            -- 出发时间：始发时间 + 出发站时间偏移 + 停留时间
+            ADDTIME(
+                    ADDTIME(t.departure_time, SEC_TO_TIME(r1.arrival_time_offset * 60)),
+                    SEC_TO_TIME(r1.stop_duration * 60)
+            ) AS departureTime,
+            -- 到达时间：始发时间 + 到达站时间偏移
+            ADDTIME(t.departure_time, SEC_TO_TIME(r2.arrival_time_offset * 60)) AS arrivalTime,
+            -- 历时（分钟）：到达时间偏移 - 出发站时间偏移 - 停留时间
+            (r2.arrival_time_offset - r1.arrival_time_offset - r1.stop_duration) AS duration,
+            -- 是否始发站/终点站
+            (r1.station_sequence = 1) AS departureFlag,
+            (r2.station_sequence = (
+                SELECT MAX(station_sequence)
+                FROM route
+                WHERE train_number = t.train_number
+            )) AS arrivalFlag
+        FROM
+            route r1
+                JOIN route r2 ON r1.train_number = r2.train_number
+                JOIN train t ON r1.train_number = t.train_number
+                JOIN station s_dep ON r1.station_id = s_dep.station_id
+                JOIN station s_arr ON r2.station_id = s_arr.station_id
+                JOIN daily_train dt ON dt.train_number = t.train_number
+        WHERE
+            s_dep.city_code = #{depStationId}
+          AND s_arr.city_code = #{arrStationId}
+          AND r2.station_sequence > r1.station_sequence
+          AND dt.departure_date = #{date} -- 指定日期
+          AND dt.status = 'scheduled';
+    </select>
+    <select id="findTrainsByCityCodes" resultType="com.qdu.dto.domain.TrainInfo">
+        SELECT
+        t.train_number AS trainNumber,
+        t.train_type AS trainType,
+        s_dep.station_name AS departureStation,
+        s_arr.station_name AS arrivalStation,
+        -- 出发时间：始发时间 + 出发站时间偏移 + 停留时间
+        ADDTIME(
+        ADDTIME(t.departure_time, SEC_TO_TIME(r1.arrival_time_offset * 60)),
+        SEC_TO_TIME(r1.stop_duration * 60)
+        ) AS departureTime,
+        -- 到达时间：始发时间 + 到达站时间偏移
+        ADDTIME(t.departure_time, SEC_TO_TIME(r2.arrival_time_offset * 60)) AS arrivalTime,
+        -- 历时（分钟）：到达时间偏移 - 出发站时间偏移 - 停留时间
+        (r2.arrival_time_offset - r1.arrival_time_offset - r1.stop_duration) AS duration,
+        -- 里程计算：到达站里程 - 出发站里程
+        (r2.mileage - r1.mileage) AS distance,
+        -- 是否始发站/终点站
+        (r1.station_sequence = 1) AS departureFlag,
+        (r2.station_sequence = (
+        SELECT MAX(station_sequence)
+        FROM route
+        WHERE train_number = t.train_number
+        )) AS arrivalFlag
+        FROM
+        route r1
+        JOIN route r2 ON r1.train_number = r2.train_number
+        JOIN train t ON r1.train_number = t.train_number
+        JOIN station s_dep ON r1.station_id = s_dep.station_id
+        JOIN station s_arr ON r2.station_id = s_arr.station_id
+        JOIN daily_train dt ON dt.train_number = t.train_number
+        WHERE
+        s_dep.city_code = #{depCityCode}
+        AND s_arr.city_code = #{arrCityCode}
+        AND r2.station_sequence > r1.station_sequence
+                                  AND dt.departure_date = #{date} -- 指定日期
+        AND dt.status = 'scheduled';
+    </select>
+    <select id="getTrainIdByNumberAndDate" resultType="java.lang.String">
+        SELECT train_id
+        FROM daily_train
+        WHERE train_number = #{trainNumber}
+          AND departure_date = #{departureDate}
+    </select>
+    <select id="findTrainInfoByTrainId" resultType="com.qdu.dto.domain.TrainInfo">
+        SELECT
+        t.train_number AS trainNumber,
+        t.train_type AS trainType,
+        s1.station_name AS departureStation,
+        s2.station_name AS arrivalStation,
+        -- 出发时间：始发时间 + 出发站时间偏移 + 停留时间
+        ADDTIME(
+                ADDTIME(t.departure_time, SEC_TO_TIME(r1.arrival_time_offset * 60)),
+                SEC_TO_TIME(r1.stop_duration * 60)
+        ) AS departureTime,
+        -- 到达时间：始发时间 + 到达站时间偏移
+        ADDTIME(t.departure_time, SEC_TO_TIME(r2.arrival_time_offset * 60)) AS arrivalTime,
+        -- 历时（分钟）：到达时间偏移 - 出发站时间偏移 - 停留时间
+        (r2.arrival_time_offset - r1.arrival_time_offset - r1.stop_duration) AS duration,
+        (r2.mileage - r1.mileage) AS distance,
+        t.start_station_id = s1.station_id AS departureFlag,
+        t.end_station_id = s2.station_id AS arrivalFlag
+        FROM daily_train dt
+        INNER JOIN train t ON dt.train_number = t.train_number
+        INNER JOIN route r1 ON
+        t.train_number = r1.train_number
+        AND r1.station_id = #{startStationId}
+        INNER JOIN route r2 ON
+        t.train_number = r2.train_number
+        AND r2.station_id = #{endStationId}
+        INNER JOIN station s1 ON r1.station_id = s1.station_id
+        INNER JOIN station s2 ON r2.station_id = s2.station_id
+        WHERE dt.train_id = #{trainId}
+        AND r2.station_sequence > r1.station_sequence
+                                  LIMIT 1
+    </select>
+    <select id="findDepartureDateByTrainId" resultType="java.util.Date">
+        SELECT departure_date
+        FROM daily_train
+        WHERE train_id = #{trainId}
+        LIMIT 1
+    </select>
+</mapper>

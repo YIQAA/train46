@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qdu.mapper.StationMapper">
+
+
+    <select id="getStationNameByid" resultType="java.lang.String">
+        select station_name from station where station_id = #{stationId}
+    </select>
+    <select id="getStationIdByName" resultType="java.lang.Integer">
+        select station_id from station where station_name = #{stationName}
+    </select>
+    <select id="getStationIdByCity" resultType="java.lang.Integer">
+        select station_id from station where city = #{city}
+    </select>
+
+<!--    车票查询列表，下拉菜单的车站-->
+    <resultMap id="CityDTOMap" type="com.qdu.dto.resp.ticketList.CityQueryRespDTO">
+        <result column="city" property="name"/>
+        <result column="city_code" property="code"/>
+    </resultMap>
+    <select id="selectCityList" resultMap="CityDTOMap">
+        SELECT distinct city, city_code FROM station
+    </select>
+
+<!--    根据城市代码查询车站名-->
+    <select id="getStationNamesByCityCode" resultType="java.lang.String">
+        select station_name from station where city_code = #{code}
+    </select>
+    <select id="findStationIdsByCityCode" resultType="java.lang.Long">
+        select station_id from station where city_code = #{code}
+    </select>
+    <select id="getStationSeqByTrainIdAndStationName" resultType="java.lang.Integer">
+        SELECT r.station_sequence
+        FROM route r
+                 INNER JOIN station s ON r.station_id = s.station_id
+        WHERE r.train_number = #{trainNumber}
+          AND s.station_name = #{stationName}
+            LIMIT 1
+    </select>
+    <select id="getTrainStationByTrainId" resultType="com.qdu.dto.resp.ticketList.TrainStationQueryRespDTO">
+        SELECT
+        r.station_sequence AS sequence,
+        s.station_name AS stationName,
+        <!-- 始发站到达时间为null -->
+        CASE WHEN r.station_sequence = 1 THEN NULL
+        ELSE DATE_FORMAT(
+        ADDTIME(
+        CONCAT(dt.departure_date, ' ', t.departure_time),
+        SEC_TO_TIME(r.arrival_time_offset * 60)
+        ),
+        '%H:%i'
+        )
+        END AS arrivalTime,
+        <!-- 终点站出发时间为null -->
+        CASE WHEN r.station_sequence = max_seq.max_sequence THEN NULL
+        ELSE DATE_FORMAT(
+        ADDTIME(
+        ADDTIME(
+        CONCAT(dt.departure_date, ' ', t.departure_time),
+        SEC_TO_TIME(r.arrival_time_offset * 60)
+        ),
+        SEC_TO_TIME(COALESCE(r.stop_duration, 0) * 60)
+        ),
+        '%H:%i'
+        )
+        END AS departureTime,
+        COALESCE(r.stop_duration, 0) AS stopoverTime
+        FROM
+        daily_train dt
+        JOIN train t ON dt.train_number = t.train_number
+        JOIN route r ON t.train_number = r.train_number
+        JOIN station s ON r.station_id = s.station_id
+        <!-- 获取车次最大车站序号 -->
+        JOIN (
+        SELECT
+        train_number,
+        MAX(station_sequence) AS max_sequence
+        FROM route
+        GROUP BY train_number
+        ) max_seq ON r.train_number = max_seq.train_number
+        WHERE
+        dt.train_id = #{trainId}
+        ORDER BY
+        r.station_sequence
+    </select>
+    <select id="getCityCodeByName" resultType="java.lang.String">
+        select city_code from station where city = #{city}
+    </select>
+</mapper>

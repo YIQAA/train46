@@ -1,0 +1,13 @@
+{
+  "devDependencies": {
+    "@ant-design/colors": "^8.0.0",
+    "less": "^4.2.2",
+    "sass-embedded": "^1.85.1",
+    "unplugin-auto-import": "^19.1.1",
+    "unplugin-vue-components": "^28.4.1"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.13",
+    "js-cookie": "^3.0.5"
+  }
+}
