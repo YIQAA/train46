@@ -4,8 +4,8 @@ import com.qdu.utils.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class JwtInterceptor implements HandlerInterceptor {
     // 拦截器，验证token，

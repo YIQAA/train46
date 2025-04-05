@@ -17,7 +17,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
 
 @SpringBootApplication
-@MapperScan("com.qdu.mapper")
 public class TrainApplication {
 
     /**
