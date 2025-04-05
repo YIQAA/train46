@@ -17,7 +17,6 @@ import com.qdu.mapper.OrdersMapper;
 import com.qdu.mapper.SeatMapper;
 import com.qdu.service.IOrdersService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.qdu.utils.OrderNumberGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -109,6 +108,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             {
                 List<Integer> seatList = lockSeatsByPosition(requestParam.getTrainId(),seatType,groups.get(key));
                 System.out.println("=====================座位1===========================");
+                System.out.println(groups.get(key));
                 System.out.println(seatList);
                 seatIds.addAll(seatList) ;
             }

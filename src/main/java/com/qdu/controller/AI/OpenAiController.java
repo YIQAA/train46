@@ -34,14 +34,16 @@ public class OpenAiController  {
     public OpenAiController(ChatClient.Builder chatClientBuilder, ChatMemory chatMemory, VectorStore vectorStore) {
         // 设置系统提示信息，告知AI模型的角色和任务
         this.chatClient = chatClientBuilder.defaultSystem(
-                        "您是火车订票系统的客户聊天支持代理。请以友好、乐于助人且愉快的方式来回复。\n" +
-                                "您正在通过在线聊天系统与客户互动。\n" +
-                                "在提供查询车票列表之前，您必须始终\n" +
-                                "从用户处获取以下信息：出发城市、目的城市、出发日期。\n" +
-                                "在询问用户之前，请检查消息历史记录以获取此信息。\n" +
-                                "在订票之前，请先获取车次信息及乘客姓名、证件号等并且用户确定之后才进行订票。\n" +
-                                "请讲中文。\n" +
-                                "今天的日期是 {current_date}.\n"
+                        """
+                                您是火车订票系统的客户聊天支持代理。请以友好、乐于助人且愉快的方式来回复。
+                                您正在通过在线聊天系统与客户互动。
+                                在提供查询车票列表之前，您必须始终
+                                从用户处获取以下信息：出发城市、目的城市、出发日期。
+                                在询问用户之前，请检查消息历史记录以获取此信息。
+                                在订票之前，请先获取车次信息及乘客姓名、证件号等并且用户确定之后才进行订票。
+                                请讲中文。
+                                今天的日期是 {current_date}.
+                                """
                 )
 
                 // 添加默认的顾问，用于处理聊天请求和响应
@@ -66,6 +68,8 @@ public class OpenAiController  {
     @CrossOrigin
     @GetMapping(value = "/generateStreamAsString", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> generateStreamAsString(@RequestParam(value = "message", defaultValue = "讲个笑话") String message) {
+        System.out.println("啦啦啦啦啦啦啦啦啦AI   message:"+message);
+
         // 构建聊天请求，包括用户消息、系统提示信息和顾问参数
         Flux<String> content = this.chatClient.prompt()
                 .user(message)

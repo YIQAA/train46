@@ -83,22 +83,10 @@
 </template>
 
 <script>
-import axios from 'axios'; // 引入axios
 
-// 假设http是axios实例
-const http = axios.create({
-  baseURL: 'http://localhost:8080'
-});
 
-const fetchMessageByAI = async (params) => {
-  const { data } = await http({
-    method: 'GET',
-    url: '/api/AIchat-service/generateStreamAsString',
-    params
-  });
-  return data;
-};
-
+import {fetchMessageByAI} from "@/service/index.js";
+let eventSource;
 export default {
   data() {
     return {
@@ -112,46 +100,32 @@ export default {
         }
       ],
       sending: false
-    };
+    }
   },
   methods: {
-    async sendMessage() {
-      const input = this.userInput.trim();
-      if (!input || this.sending) return;
 
-      this.sending = true;
+    async sendMessage() {
+      const input = this.userInput.trim()
+      if (!input || this.sending) return
+
+      this.sending = true
 
       this.messages.push({
         id: Date.now(),
         type: 'text',
         content: input,
         isUser: true
-      });
+      })
 
-      this.messages.push({
-        id: Date.now(),
-        type: 'text',
-        content: 'waiting...',
-        isUser: false
-      });
+      await this.getBotResponse(input)
 
-      try {
-        const response = await fetchMessageByAI({ message: input });
-        const lastMessageIndex = this.messages.length - 1;
-        this.messages[lastMessageIndex].content = response;
-      } catch (error) {
-        console.error('请求出错:', error);
-        const lastMessageIndex = this.messages.length - 1;
-        this.messages[lastMessageIndex].content = '请求出错，请稍后再试';
-      }
-
-      this.userInput = '';
-      this.sending = false;
+      this.userInput = ''
+      this.sending = false
 
       this.$nextTick(() => {
-        const container = this.$refs.messagesContainer;
-        container.scrollTop = container.scrollHeight;
-      });
+        const container = this.$refs.messagesContainer
+        container.scrollTop = container.scrollHeight
+      })
     },
 
     handleButtonClick(btn) {
@@ -160,32 +134,58 @@ export default {
         type: 'text',
         content: btn.command,
         isUser: true
-      });
-      this.getBotResponse(btn.command);
+      })
+      this.getBotResponse(btn.command)
     },
-
     async getBotResponse(input) {
+      if (eventSource) {
+        eventSource.close();
+      }
+
+      const newMessageIndex = this.messages.length;
       this.messages.push({
         id: Date.now(),
         type: 'text',
-        content: 'waiting...',
+        content: '',
         isUser: false
       });
 
-      try {
-        const response = await fetchMessageByAI({ message: input });
-        const lastMessageIndex = this.messages.length - 1;
-        this.messages[lastMessageIndex].content = response;
-      } catch (error) {
-        console.error('请求出错:', error);
-        const lastMessageIndex = this.messages.length - 1;
-        this.messages[lastMessageIndex].content = '请求出错，请稍后再试';
-      }
+      // sse: 服务端推送 Server-Sent Events
+      eventSource = new EventSource(`http://localhost:8080/api/AIchat-service/generateStreamAsString?message=${input}`);
+      eventSource.onmessage = (event) => {
+        if (event.data === '[complete]') {
+          eventSource.close();
+          return;
+        }
+        this.messages[newMessageIndex].content += event.data;
+      };
+      eventSource.onopen = (event) => {
+        this.messages[newMessageIndex].content = '';
+      };
     }
 
-
+    // async getBotResponse(input) {
+    //   try {
+    //     const response = await fetchMessageByAI({message: input});
+    //     console.log(response);
+    //     this.messages.push({
+    //       id: Date.now(),
+    //       type: 'text',
+    //       content: response,
+    //       isUser: false
+    //     });
+    //   } catch (error) {
+    //     console.error('获取AI回复出错:', error);
+    //     this.messages.push({
+    //       id: Date.now(),
+    //       type: 'text',
+    //       content: '获取回复时出现错误，请稍后再试。',
+    //       isUser: false
+    //     });
+    //   }
+    // }
   }
-};
+}
 </script>
 
 <style scoped lang="less">
@@ -247,7 +247,6 @@ export default {
     }
   }
 }
-
 
 
 .chat-container {

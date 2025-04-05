@@ -9,9 +9,29 @@ spring:
   messages:
     basename: i18n.message
 
+#mybatis-plus:
+#  type-aliases-package: com.qdu.entity
+#  mapper-locations: classpath:com.qdu.mapper/*Mapper.xml
+##  configuration:
+##    map-underscore-to-camel-case: true
+##    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 开启SQL日志
+#
 mybatis-plus:
-  type-aliases-package: com.qdu.entity
   mapper-locations: classpath:com.qdu.mapper/*Mapper.xml
+  type-aliases-package: com.qdu.entity
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    banner: true
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-not-delete-value: 0
+      logic-delete-value: 1
+  extension:
+    enabled: true
+    data-permission:
+      enabled: true
