@@ -5,8 +5,8 @@
     <groupId>com.qdu</groupId>
     <artifactId>train</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>train1</name>
-    <description>train1</description>
+    <name>train</name>
+    <description>train</description>
     <properties>
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
-            <version>2.3.0</version>
+            <version>3.0.3</version>
         </dependency>
 <!--        devtools：热重编译-->
         <dependency>
@@ -116,7 +116,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
-            <version>2.7.6</version> <!-- 与主版本保持一致 -->
+            <version>3.2.4</version> <!-- 与主版本保持一致 -->
         </dependency>
 <!--        —————————————————————————————————————————————————————————————————————————————————-->
         <!--阿里AI-->

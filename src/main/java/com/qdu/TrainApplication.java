@@ -1,7 +1,7 @@
 package com.qdu;
 
 
-import org.mybatis.spring.annotation.MapperScan;
+
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.embedding.EmbeddingModel;
