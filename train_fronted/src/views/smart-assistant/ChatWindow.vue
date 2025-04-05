@@ -152,6 +152,7 @@ export default {
 
       // sse: 服务端推送 Server-Sent Events
       eventSource = new EventSource(`http://localhost:8080/api/AIchat-service/generateStreamAsString?message=${input}`);
+      console.log(eventSource);
       eventSource.onmessage = (event) => {
         if (event.data === '[complete]') {
           eventSource.close();
