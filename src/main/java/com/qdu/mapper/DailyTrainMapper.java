@@ -4,6 +4,7 @@ import com.qdu.entity.DailyTrain;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -16,5 +17,5 @@ import java.util.Date;
  */
 public interface DailyTrainMapper extends BaseMapper<DailyTrain> {
 
-    DailyTrain getDailyTrainByNumberAndDate(@Param("trainNumber") String trainNumber,@Param("departureDate") Date departureDate);
+    DailyTrain getDailyTrainByNumberAndDate(@Param("trainNumber") String trainNumber,@Param("departureDate") LocalDate departureDate);
 }

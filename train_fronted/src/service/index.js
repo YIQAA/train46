@@ -85,10 +85,13 @@ const fetchMessageByAI = async (params) => {
   const { data } = await http({
     method: 'GET',
     url: '/api/AIchat-service/generateStreamAsString',
-    params
-  })
-  return data
-}
+    params,
+    headers: {
+      'Accept': 'text/event-stream' // 确保请求头包含 text/event-stream
+    }
+  });
+  return data;
+};
 // 根据订单号查询订单
 const fetchOrderBySn = async (params) => {
   const { data } = await http({

@@ -22,6 +22,7 @@ import lombok.Data;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -44,7 +45,6 @@ public class TicketPageQueryReqDTO extends PageRequest {
     /**
      * 出发日期
      */
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date departureDate;
+    private LocalDate departureDate;
 
 }

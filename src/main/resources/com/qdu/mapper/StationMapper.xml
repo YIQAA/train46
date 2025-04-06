@@ -84,6 +84,6 @@
         r.station_sequence
     </select>
     <select id="getCityCodeByName" resultType="java.lang.String">
-        select city_code from station where city = #{city}
+        select distinct city_code from station where city = #{city}
     </select>
 </mapper>

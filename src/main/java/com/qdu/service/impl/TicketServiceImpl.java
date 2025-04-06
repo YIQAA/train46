@@ -13,9 +13,12 @@ import com.qdu.mapper.TrainMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
+
 import java.util.List;
+import java.util.Locale;
+
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +40,7 @@ public class TicketServiceImpl {
         resp.setDepartureStationList(stationService.getStationNamesByCityCode(requestParam.getFromCity()));
         resp.setArrivalStationList(stationService.getStationNamesByCityCode(requestParam.getToCity()));
 
-        Date departureDate =  requestParam.getDepartureDate();
+        LocalDate departureDate =  requestParam.getDepartureDate();
 
         // 2. 根据城市code和日期查询车次基础信息
         List<TrainInfo> trains=trainService.findTrainsByCityCodes(requestParam.getFromCity(), requestParam.getToCity(), departureDate);
@@ -81,17 +84,22 @@ public class TicketServiceImpl {
     }
 
     //ai适用方法，根据城市名和日期查询
-    public List<TicketListDTO> listTicketPageQueryForAI(String fromCity, String toCity, Date departureDate) {
+    public List<TicketListDTO> listTicketPageQueryForAIService(String fromCity, String toCity, LocalDate departureDate) {
         List<TicketListDTO> dtos = new ArrayList<>();
+        System.out.println("+++++++++++++++++++++++++++++ai的service ++++++++++++++++++++++++++++++");
+        System.out.println(fromCity+"  "+toCity+"  "+departureDate);
         String fromCityCode = stationMapper.getCityCodeByName(fromCity);
         String toCityCode = stationMapper.getCityCodeByName(toCity);
         TicketPageQueryReqDTO requestParam = new TicketPageQueryReqDTO();
         requestParam.setFromCity(fromCityCode);
         requestParam.setToCity(toCityCode);
         requestParam.setDepartureDate(departureDate);
+
         dtos = listTicketPageQuery(requestParam).getTrainList();
 
-
+        System.out.println("+++++++++++++++++++++++++++++ai的service的resp++++++++++++++++++++++++++++++");
+        System.out.println(requestParam);
+        System.out.println(dtos);
         return dtos;
     }
 

@@ -105,27 +105,46 @@ export default {
   methods: {
 
     async sendMessage() {
-      const input = this.userInput.trim()
-      if (!input || this.sending) return
+      const input = this.userInput.trim();
+      if (!input || this.sending) return;
 
-      this.sending = true
+      this.sending = true;
 
-      this.messages.push({
+      // 添加用户消息
+      const userMessage = {
         id: Date.now(),
         type: 'text',
         content: input,
         isUser: true
-      })
+      };
+      this.messages.push(userMessage);
 
-      await this.getBotResponse(input)
+      // 添加临时AI消息
+      const tempId = Date.now() + 1;
+      this.messages.push({
+        id: tempId,
+        type: 'text',
+        content: '正在思考中...',
+        isUser: false
+      });
 
-      this.userInput = ''
-      this.sending = false
-
+      // 立即滚动到底部
       this.$nextTick(() => {
-        const container = this.$refs.messagesContainer
-        container.scrollTop = container.scrollHeight
-      })
+        const container = this.$refs.messagesContainer;
+        container.scrollTop = container.scrollHeight;
+      });
+
+      this.userInput = '';
+      try {
+        await this.getBotResponse(input, tempId);
+      } finally {
+        this.sending = false;
+        // 最终滚动到底部
+        this.$nextTick(() => {
+          const container = this.$refs.messagesContainer;
+          container.scrollTop = container.scrollHeight;
+        });
+      }
     },
 
     handleButtonClick(btn) {
@@ -137,54 +156,46 @@ export default {
       })
       this.getBotResponse(btn.command)
     },
-    async getBotResponse(input) {
-      if (eventSource) {
-        eventSource.close();
-      }
+    // 获取AI回复
+    async getBotResponse(input, tempId) {
+      try {
+        const response = await fetchMessageByAI({ message: input });
+        const index = this.messages.findIndex(msg => msg.id === tempId);
 
-      const newMessageIndex = this.messages.length;
-      this.messages.push({
-        id: Date.now(),
-        type: 'text',
-        content: '',
-        isUser: false
-      });
-
-      // sse: 服务端推送 Server-Sent Events
-      eventSource = new EventSource(`http://localhost:8080/api/AIchat-service/generateStreamAsString?message=${input}`);
-      console.log(eventSource);
-      eventSource.onmessage = (event) => {
-        if (event.data === '[complete]') {
-          eventSource.close();
-          return;
+        if (index !== -1) {
+          // 替换临时消息
+          this.messages.splice(index, 1, {
+            id: tempId,
+            type: 'text',
+            content: response,
+            isUser: false
+          });
+        } else {
+          // 如果临时消息不存在则添加新消息
+          this.messages.push({
+            id: Date.now(),
+            type: 'text',
+            content: response,
+            isUser: false
+          });
         }
-        this.messages[newMessageIndex].content += event.data;
-      };
-      eventSource.onopen = (event) => {
-        this.messages[newMessageIndex].content = '';
-      };
-    }
+      } catch (error) {
+        console.error('获取AI回复出错:', error);
+        const index = this.messages.findIndex(msg => msg.id === tempId);
+        const errorMessage = {
+          id: tempId,
+          type: 'text',
+          content: '获取回复时出现错误，请稍后再试。',
+          isUser: false
+        };
 
-    // async getBotResponse(input) {
-    //   try {
-    //     const response = await fetchMessageByAI({message: input});
-    //     console.log(response);
-    //     this.messages.push({
-    //       id: Date.now(),
-    //       type: 'text',
-    //       content: response,
-    //       isUser: false
-    //     });
-    //   } catch (error) {
-    //     console.error('获取AI回复出错:', error);
-    //     this.messages.push({
-    //       id: Date.now(),
-    //       type: 'text',
-    //       content: '获取回复时出现错误，请稍后再试。',
-    //       isUser: false
-    //     });
-    //   }
-    // }
+        if (index !== -1) {
+          this.messages.splice(index, 1, errorMessage);
+        } else {
+          this.messages.push(errorMessage);
+        }
+      }
+    },
   }
 }
 </script>
@@ -218,7 +229,10 @@ export default {
     }
   }
 }
-
+.message.loading-message :deep(.ant-comment-content) {
+  color: #999;
+  font-style: italic;
+}
 
 // 修改样式部分
 .input-footer {

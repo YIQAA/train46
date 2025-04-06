@@ -9,6 +9,7 @@ import com.qdu.service.ITrainsService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.AllArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -31,12 +32,12 @@ public class TrainsServiceImpl extends ServiceImpl<TrainMapper, Train> implement
     private final DailyTrainMapper dailyTrainMapper;
 
     @Override
-    public List<TrainInfo> findTrainsByCityCodes(String depCityCode, String arrCityCode, Date date) {
+    public List<TrainInfo> findTrainsByCityCodes(String depCityCode, String arrCityCode, LocalDate date) {
         return trainMapper.findTrainsByCityCodes(depCityCode,arrCityCode,date);
     }
 
     @Override
-    public String getTrainIdByNumberAndDate(String trainNumber, Date departureDate) {
+    public String getTrainIdByNumberAndDate(String trainNumber, LocalDate departureDate) {
         return trainMapper.getTrainIdByNumberAndDate(trainNumber,departureDate);
     }
 
@@ -46,7 +47,7 @@ public class TrainsServiceImpl extends ServiceImpl<TrainMapper, Train> implement
     }
 
     @Override
-    public Date findDepartureDateByTrainId(Integer trainId) {
+    public LocalDate findDepartureDateByTrainId(Integer trainId) {
         return baseMapper.findDepartureDateByTrainId(trainId);
     }
 

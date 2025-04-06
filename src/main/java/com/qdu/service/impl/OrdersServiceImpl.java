@@ -60,7 +60,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Integer startStationId = stationsService.getStationIdByName(requestParam.getDepartureStation());
         Integer endStationId = stationsService.getStationIdByName(requestParam.getArrivalStation());
         TrainInfo trainInfo = trainsService.findTrainInfoByTrainId(requestParam.getTrainId(), startStationId, endStationId);
-        Date departureDate = trainsService.findDepartureDateByTrainId(requestParam.getTrainId());
+        LocalDate departureDate = trainsService.findDepartureDateByTrainId(requestParam.getTrainId());
 
 
 
@@ -71,9 +71,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orders.setUserId(requestParam.getUserId());
         orders.setTrainId(requestParam.getTrainId());
         orders.setTrainNumber(trainInfo.getTrainNumber());
-        orders.setTrainDate(departureDate.toInstant()      // 转换为 Instant
-                                            .atZone(ZoneId.systemDefault()) // 指定时区
-                                            .toLocalDate());
+        orders.setTrainDate(departureDate);
         orders.setStartStationId(startStationId);
         orders.setEndStationId(endStationId);
         orders.setDepartureTime(LocalTime.parse(trainInfo.getDepartureTime()));
@@ -229,7 +227,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     // 用于保证同一毫秒内的序列号
     private static final AtomicInteger sequence = new AtomicInteger(0);
     //生成订单号
-    public String generateOrderId(String userId, String trainNumber, Date departureDate) {
+    public String generateOrderId(String userId, String trainNumber, LocalDate departureDate) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMdd");
         String datePart = dateFormat.format(departureDate); // 6位日期
 

@@ -66,19 +66,16 @@ public class OpenAiController  {
      * @return AI生成的响应流
      */
     @CrossOrigin
-    @GetMapping(value = "/generateStreamAsString", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> generateStreamAsString(@RequestParam(value = "message", defaultValue = "讲个笑话") String message) {
+    @GetMapping(value = "/generateStreamAsString")
+    public String generateStreamAsString(@RequestParam(value = "message", defaultValue = "讲个笑话") String message) {
         System.out.println("啦啦啦啦啦啦啦啦啦AI   message:"+message);
 
         // 构建聊天请求，包括用户消息、系统提示信息和顾问参数
-        Flux<String> content = this.chatClient.prompt()
+        return this.chatClient.prompt()
                 .user(message)
-                .system(promptSystemSpec -> promptSystemSpec.param("current_date", LocalDate.now().toString()))
-                .advisors(advisorSpec -> advisorSpec.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY,100))
-                // 发送请求并获取响应流
-                .stream()
+                .system(spec -> spec.param("current_date", LocalDate.now().toString()))
+                .advisors(advisorSpec -> advisorSpec.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100))
+                .call()
                 .content();
-        // 在响应流末尾添加[complete]表示响应结束
-        return content.concatWith(Flux.just("[complete]"));
     }
 }
