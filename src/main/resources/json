@@ -1,0 +1,47 @@
+{
+  "status": "success/error",
+  "type": "text/table/link/error",
+  "content": {
+    // 根据不同类型变化的数据结构
+  },
+  "timestamp": "ISO 8601时间戳"
+}
+
+{
+  "status": "success/error",
+  "type": "text",
+  "content": {
+    "text": "......."
+  }
+}
+{
+  "status": "success/error",
+  "type": "link",
+  "content": {
+    "text": "查看所有车次详情",
+    "url": "/schedule/北京-上海/2023-12-25",
+    "action": "redirect/modal"  // 交互方式
+  }
+}
+{
+  "status": "success/error",
+  "type": "table",
+  "content": {
+    "text": "........",
+    "columns": ["车次", "出发站/到达站", "出发-到达时间", "时长", "余票及票价"],
+    "data": [
+      ["G123", "北京西站-->上海虹桥", "8:00-12:30", "4h30m", "充足，553元起"],
+      ["G123", "北京南站-->上海虹桥", "9:00-12:30", "3h30m", "充足，503元起"]
+    ]
+  }
+}
+
+{
+  "status": "success/error",
+  "type": "error",
+  "content": {
+    "text": "未找到北京到火星的列车信息,请检查城市名称或尝试邻近城市",
+    "code": "CITY_404"
+
+  }
+}
