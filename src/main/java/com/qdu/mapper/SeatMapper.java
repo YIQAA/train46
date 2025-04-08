@@ -18,8 +18,6 @@ import java.util.List;
 public interface SeatMapper extends BaseMapper<Seat> {
 
     List<TrainSeatsDTO> selectAvailableSeats(@Param("trainId") String trainId,
-                                             @Param("startSeq") Integer startSeq,
-                                             @Param("endSeq") Integer endSeq,
                                              @Param("mileage") Integer mileage);
 
     // 查询符合条件的可用座位ID（新增trainId参数）

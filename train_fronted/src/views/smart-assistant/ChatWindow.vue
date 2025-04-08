@@ -29,9 +29,12 @@
 
                 <!-- 表格类型 -->
                 <div v-if="message.type === 'table'" class="content-table">
+
+                  <div class="table-header">{{ message.content.text }}</div>
+                  <br>
                   <a-table
-                      :columns="message.columns"
-                      :data-source="message.data"
+                      :columns="message.content.columns"
+                      :data-source="message.content.data"
                       :pagination="false"
                       size="small"
                   />
@@ -82,122 +85,129 @@
   </a-layout>
 </template>
 
-<script>
 
+<script setup>
+import { ref, reactive, nextTick } from 'vue';
+import { fetchMessageByAI } from "@/service/index.js";
 
-import {fetchMessageByAI} from "@/service/index.js";
-let eventSource;
-export default {
-  data() {
-    return {
-      userInput: '',
-      messages: [
-        {
-          id: 1,
-          type: 'text',
-          content: '您好！我是火车票务助手，请问有什么可以帮您？',
-          isUser: false
-        }
-      ],
-      sending: false
-    }
-  },
-  methods: {
-
-    async sendMessage() {
-      const input = this.userInput.trim();
-      if (!input || this.sending) return;
-
-      this.sending = true;
-
-      // 添加用户消息
-      const userMessage = {
-        id: Date.now(),
-        type: 'text',
-        content: input,
-        isUser: true
-      };
-      this.messages.push(userMessage);
-
-      // 添加临时AI消息
-      const tempId = Date.now() + 1;
-      this.messages.push({
-        id: tempId,
-        type: 'text',
-        content: '正在思考中...',
-        isUser: false
-      });
-
-      // 立即滚动到底部
-      this.$nextTick(() => {
-        const container = this.$refs.messagesContainer;
-        container.scrollTop = container.scrollHeight;
-      });
-
-      this.userInput = '';
-      try {
-        await this.getBotResponse(input, tempId);
-      } finally {
-        this.sending = false;
-        // 最终滚动到底部
-        this.$nextTick(() => {
-          const container = this.$refs.messagesContainer;
-          container.scrollTop = container.scrollHeight;
-        });
-      }
-    },
-
-    handleButtonClick(btn) {
-      this.messages.push({
-        id: Date.now(),
-        type: 'text',
-        content: btn.command,
-        isUser: true
-      })
-      this.getBotResponse(btn.command)
-    },
-    // 获取AI回复
-    async getBotResponse(input, tempId) {
-      try {
-        const response = await fetchMessageByAI({ message: input });
-        const index = this.messages.findIndex(msg => msg.id === tempId);
-
-        if (index !== -1) {
-          // 替换临时消息
-          this.messages.splice(index, 1, {
-            id: tempId,
-            type: 'text',
-            content: response,
-            isUser: false
-          });
-        } else {
-          // 如果临时消息不存在则添加新消息
-          this.messages.push({
-            id: Date.now(),
-            type: 'text',
-            content: response,
-            isUser: false
-          });
-        }
-      } catch (error) {
-        console.error('获取AI回复出错:', error);
-        const index = this.messages.findIndex(msg => msg.id === tempId);
-        const errorMessage = {
-          id: tempId,
-          type: 'text',
-          content: '获取回复时出现错误，请稍后再试。',
-          isUser: false
-        };
-
-        if (index !== -1) {
-          this.messages.splice(index, 1, errorMessage);
-        } else {
-          this.messages.push(errorMessage);
-        }
-      }
-    },
+// 响应式数据
+const userInput = ref('');
+const messages = ref([
+  {
+    id: 1,
+    type: 'text',
+    content: '您好！我是火车票务助手，请问有什么可以帮您？',
+    isUser: false
   }
-}
+]);
+const sending = ref(false);
+const messagesContainer = ref(null);
+
+// 事件处理
+const handleButtonClick = (btn) => {
+  messages.value.push({
+    id: Date.now(),
+    type: 'text',
+    content: btn.command,
+    isUser: true
+  });
+  getBotResponse(btn.command);
+};
+
+// 获取AI回复
+const getBotResponse = async (input, tempId) => {
+  try {
+    const response = await fetchMessageByAI({ message: input });
+    const index = messages.value.findIndex(msg => msg.id === tempId);
+    console.log('获取AI回复:', response);
+    // 转换表格数据结构
+    const processedContent = response.type === 'table' ? {
+      text: response.content.text,
+      columns: response.content.columns.map((title, index) => ({
+        title,
+        dataIndex: `${index}`, // 用索引作为数据字段名
+        key: `${index}`
+      })),
+      data: response.content.data.map((row, i) => {
+        const record = { key: i };
+        row.forEach((value, index) => {
+          record[`${index}`] = value;
+        });
+        return record;
+      })
+    } : response.content;
+
+    const newMessage = {
+      id: tempId,
+      type: response.type,
+      content: processedContent,
+      isUser: false
+    };
+
+
+
+    if (index !== -1) {
+      messages.value.splice(index, 1, newMessage);
+    } else {
+      messages.value.push(newMessage);
+    }
+  } catch (error) {
+    console.error('获取AI回复出错:', error);
+    const errorMessage = {
+      id: tempId,
+      type: 'text',
+      content: '获取回复时出现错误，请稍后再试。',
+      isUser: false
+    };
+
+    const index = messages.value.findIndex(msg => msg.id === tempId);
+    if (index !== -1) {
+      messages.value.splice(index, 1, errorMessage);
+    } else {
+      messages.value.push(errorMessage);
+    }
+  }
+};
+
+// 发送消息
+const sendMessage = async () => {
+  const input = userInput.value.trim();
+  if (!input || sending.value) return;
+
+  sending.value = true;
+
+  // 添加用户消息
+  messages.value.push({
+    id: Date.now(),
+    type: 'text',
+    content: input,
+    isUser: true
+  });
+
+  // 添加临时AI消息
+  const tempId = Date.now() + 1;
+  messages.value.push({
+    id: tempId,
+    type: 'text',
+    content: '正在思考中...',
+    isUser: false
+  });
+
+  // 立即滚动到底部
+  await nextTick();
+  messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+
+  userInput.value = '';
+
+  try {
+    await getBotResponse(input, tempId);
+  } finally {
+    sending.value = false;
+    // 最终滚动到底部
+    await nextTick();
+    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+  }
+};
 </script>
 
 <style scoped lang="less">

@@ -18,7 +18,7 @@ public class SeatServiceImpl extends ServiceImpl<SeatMapper, Seat> implements IS
     private final SeatMapper seatMapper;
 
     @Override
-    public List<TrainSeatsDTO> selectAvailableSeats(String trainId, Integer startSeq, Integer endSeq, Integer mileage) {
-        return seatMapper.selectAvailableSeats(trainId, startSeq, endSeq, mileage);
+    public List<TrainSeatsDTO> selectAvailableSeats(String trainId, Integer mileage) {
+        return seatMapper.selectAvailableSeats(trainId, mileage);
     }
 }

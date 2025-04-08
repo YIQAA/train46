@@ -2,7 +2,7 @@ package com.qdu.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qdu.dto.domain.TicketListDTO;
-import com.qdu.dto.domain.TrainInfo;
+import com.qdu.dto.domain.StationToStationRouteDTO;
 import com.qdu.dto.domain.TrainSeatsDTO;
 import com.qdu.dto.req.TicketPageQueryReqDTO;
 import com.qdu.dto.resp.ticketList.TicketPageQueryRespDTO;
@@ -10,6 +10,7 @@ import com.qdu.dto.resp.ticketList.TicketPageQueryRespDTO;
 import com.qdu.mapper.StationMapper;
 import com.qdu.mapper.TrainMapper;
 
+import com.qdu.service.ITicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,12 +18,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 import java.util.List;
-import java.util.Locale;
 
 
 @Service
 @RequiredArgsConstructor
-public class TicketServiceImpl {
+public class TicketServiceImpl implements ITicketService {
 
     private final TrainsServiceImpl trainService;
     private final StationsServiceImpl stationService;
@@ -31,7 +31,42 @@ public class TicketServiceImpl {
     private final StationMapper stationMapper;
     private final SeatServiceImpl seatService;
 
-    //根据三个请求参数查询车票信息
+    //根据出发城市code，到达城市code，日期  查询 车次车票信息列表
+    public List<TicketListDTO> listTicketQuery(String fromCityCode, String toCityCode, LocalDate departureDate) {
+
+        List<TicketListDTO> dtos = new ArrayList<>();
+
+        //查询两城市之间的火车信息，因为一个城市可能有多个车站，一条火车路线中，可能包含一个城市的多个站点，
+        // 比如北京南-上海虹桥，北京西-上海虹桥，所以根据两个城市名称可能会查出多条站到站的路线信息
+        List<StationToStationRouteDTO> routes=trainService.findTrainsByCityCodes(fromCityCode, toCityCode, departureDate);
+
+        for (StationToStationRouteDTO route : routes) {
+            TicketListDTO dto = new TicketListDTO();
+            // 1. 根据车次号和出发日期查询可能重复的 车次id，
+            String trainId = trainService.getTrainIdByNumberAndDate(route.getTrainNumber(), departureDate);
+            // 2. 基础信息封装到TicketListDTO
+            dto.setTrainId(trainId);
+            dto.setTrainNumber(route.getTrainNumber());
+            dto.setTrainType(route.getTrainType());
+            dto.setDepartureStation(route.getDepartureStation());
+            dto.setArrivalStation(route.getArrivalStation());
+            dto.setDepartureTime(route.getDepartureTime().toString().replaceAll(":\\d+$", ""));
+            dto.setArrivalTime(route.getArrivalTime().toString().replaceAll(":\\d+$", ""));
+            dto.setDuration(convertMinutesToHourMinute(route.getDuration()));
+            dto.setDepartureFlag(route.getDepartureFlag());
+            dto.setArrivalFlag(route.getArrivalFlag());
+            // 3. 根据查到的具体 每日车次id 和 里程  查询  各种座位票价  信息
+            List<TrainSeatsDTO> seats = seatService.selectAvailableSeats(trainId, route.getDistance());
+            dto.setSeatClassList(seats);
+
+            dtos.add(dto);
+        }
+
+        return dtos;
+    }
+
+
+    //余票查询页面     查询车票信息
     public TicketPageQueryRespDTO listTicketPageQuery(TicketPageQueryReqDTO requestParam) {
 
         TicketPageQueryRespDTO resp = new TicketPageQueryRespDTO();
@@ -40,44 +75,10 @@ public class TicketServiceImpl {
         resp.setDepartureStationList(stationService.getStationNamesByCityCode(requestParam.getFromCity()));
         resp.setArrivalStationList(stationService.getStationNamesByCityCode(requestParam.getToCity()));
 
-        LocalDate departureDate =  requestParam.getDepartureDate();
+        List<TicketListDTO> ticketdtos = listTicketQuery(requestParam.getFromCity(), requestParam.getToCity(), requestParam.getDepartureDate());
+        resp.setTrainList(ticketdtos);
 
-        // 2. 根据城市code和日期查询车次基础信息
-        List<TrainInfo> trains=trainService.findTrainsByCityCodes(requestParam.getFromCity(), requestParam.getToCity(), departureDate);
-        System.out.println("------------------------------------车次信息------------------------------------");
-        System.out.println(trains);
-
-
-        List<TicketListDTO> dtos = new ArrayList<>();
-        for (TrainInfo train : trains) {
-            TicketListDTO dto = new TicketListDTO();
-            String trainId = trainService.getTrainIdByNumberAndDate(train.getTrainNumber(), departureDate);
-            dto.setTrainId(trainId);
-            // 基础信息
-            dto.setTrainNumber(train.getTrainNumber());
-            dto.setTrainType(train.getTrainType());
-            dto.setDepartureStation(train.getDepartureStation());
-            dto.setArrivalStation(train.getArrivalStation());
-            dto.setDepartureTime(train.getDepartureTime().toString().replaceAll(":\\d+$", ""));
-            dto.setArrivalTime(train.getArrivalTime().toString().replaceAll(":\\d+$", ""));
-            dto.setDuration(convertMinutesToHourMinute(train.getDuration()));
-            dto.setDepartureFlag(train.getDepartureFlag());
-            dto.setArrivalFlag(train.getArrivalFlag());
-
-            //根据车次和车站名称查站序
-            Integer startSeq = stationService.getStationSeqByTrainIdAndStationName(train.getTrainNumber(), train.getDepartureStation());
-            Integer endSeq = stationService.getStationSeqByTrainIdAndStationName(train.getTrainNumber(), train.getArrivalStation());
-
-            // 3. 查询座位信息
-            List<TrainSeatsDTO> seats = seatService.selectAvailableSeats(trainId, startSeq, endSeq, train.getDistance());
-            dto.setSeatClassList(seats);
-            System.out.println("------------------------------------座位配置------------------------------------");
-            System.out.println(seats);
-            dtos.add(dto);
-        }
-        resp.setTrainList(dtos);
-
-        System.out.println("-------------------------总的resp-------------------------------");
+        System.out.println("-------------------------余票查询页面---总的resp-------------------------------");
         System.out.println(resp);
         return resp;
 

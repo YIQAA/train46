@@ -1,7 +1,6 @@
 package com.qdu.service.impl;
 
-import com.qdu.dto.domain.TrainInfo;
-import com.qdu.entity.DailyTrain;
+import com.qdu.dto.domain.StationToStationRouteDTO;
 import com.qdu.entity.Train;
 import com.qdu.mapper.DailyTrainMapper;
 import com.qdu.mapper.TrainMapper;
@@ -10,8 +9,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -32,7 +29,7 @@ public class TrainsServiceImpl extends ServiceImpl<TrainMapper, Train> implement
     private final DailyTrainMapper dailyTrainMapper;
 
     @Override
-    public List<TrainInfo> findTrainsByCityCodes(String depCityCode, String arrCityCode, LocalDate date) {
+    public List<StationToStationRouteDTO> findTrainsByCityCodes(String depCityCode, String arrCityCode, LocalDate date) {
         return trainMapper.findTrainsByCityCodes(depCityCode,arrCityCode,date);
     }
 
@@ -42,7 +39,7 @@ public class TrainsServiceImpl extends ServiceImpl<TrainMapper, Train> implement
     }
 
     @Override
-    public TrainInfo findTrainInfoByTrainId(Integer trainId, Integer startStationId, Integer endStationId) {
+    public StationToStationRouteDTO findTrainInfoByTrainId(Integer trainId, Integer startStationId, Integer endStationId) {
         return trainMapper.findTrainInfoByTrainId(trainId,startStationId,endStationId);
     }
 

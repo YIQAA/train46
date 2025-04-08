@@ -9,5 +9,5 @@ import java.util.List;
 public interface ISeatService extends IService<Seat> {
 
     //查询某车次中某类型的座位信息
-    List<TrainSeatsDTO> selectAvailableSeats(String trainId, Integer startSeq, Integer endSeq, Integer mileage);
+    List<TrainSeatsDTO> selectAvailableSeats(String trainId, Integer mileage);
 }

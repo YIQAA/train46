@@ -84,10 +84,11 @@ const fetchLogout = async (body) => {
 const fetchMessageByAI = async (params) => {
   const { data } = await http({
     method: 'GET',
-    url: '/api/AIchat-service/generateStreamAsString',
+    url: '/api/AIchat-service/generateAnswer',
     params,
     headers: {
-      'Accept': 'text/event-stream' // 确保请求头包含 text/event-stream
+      'Accept': 'application/json'
+      // 'Accept': 'text/event-stream'
     }
   });
   return data;

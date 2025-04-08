@@ -28,7 +28,7 @@
         FROM train
         WHERE train_number = #{trainNumber}
     </select>
-    <select id="findTrainsByCities" resultType="com.qdu.dto.domain.TrainInfo">
+    <select id="findTrainsByCities" resultType="com.qdu.dto.domain.StationToStationRouteDTO">
         SELECT
             t.train_number AS trainNumber,
             t.train_type AS trainType,
@@ -64,7 +64,7 @@
           AND dt.departure_date = #{date} -- 指定日期
           AND dt.status = 'scheduled';
     </select>
-    <select id="findTrainsByCityCodes" resultType="com.qdu.dto.domain.TrainInfo">
+    <select id="findTrainsByCityCodes" resultType="com.qdu.dto.domain.StationToStationRouteDTO">
         SELECT
         t.train_number AS trainNumber,
         t.train_type AS trainType,
@@ -108,7 +108,7 @@
         WHERE train_number = #{trainNumber}
           AND departure_date = #{departureDate}
     </select>
-    <select id="findTrainInfoByTrainId" resultType="com.qdu.dto.domain.TrainInfo">
+    <select id="findTrainInfoByTrainId" resultType="com.qdu.dto.domain.StationToStationRouteDTO">
         SELECT
         t.train_number AS trainNumber,
         t.train_type AS trainType,
@@ -140,7 +140,7 @@
         AND r2.station_sequence > r1.station_sequence
                                   LIMIT 1
     </select>
-    <select id="findDepartureDateByTrainId" resultType="java.util.Date">
+    <select id="findDepartureDateByTrainId" resultType="java.time.LocalDate">
         SELECT departure_date
         FROM daily_train
         WHERE train_id = #{trainId}

@@ -6,7 +6,7 @@ import lombok.Data;
  * 车次基础信息（数据库查询结果的映射对象）
  */
 @Data
-public class TrainInfo {
+public class StationToStationRouteDTO {
     /**
      * 车次编号（如 G231）
      */

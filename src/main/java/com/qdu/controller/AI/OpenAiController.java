@@ -10,20 +10,34 @@ import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
-import java.time.LocalDate;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import com.fasterxml.jackson.core.JsonProcessingException; // JSON解析异常
+import com.fasterxml.jackson.databind.ObjectMapper;         // JSON序列化/反序列化工具
+import com.fasterxml.jackson.core.type.TypeReference;      // 泛型类型引用
 /**
  * 控制器类，处理与AI聊天相关的请求
  */
 @RestController
 @CrossOrigin
 @RequestMapping("/api/AIchat-service")
-public class OpenAiController  {
+public class OpenAiController {
 
     // 聊天客户端对象，用于与AI模型进行交互
     private final ChatClient chatClient;
+    // JSON序列化/反序列化工具
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    // 系统提示模板，用于描述AI模型的角色和任务
+    private String systemPromptTemplate ;
 
     /**
      * 构造函数，初始化聊天客户端
@@ -32,19 +46,16 @@ public class OpenAiController  {
      * @param vectorStore 向量存储对象，用于存储文本的向量表示
      */
     public OpenAiController(ChatClient.Builder chatClientBuilder, ChatMemory chatMemory, VectorStore vectorStore) {
+        try {
+            // 读取提示词文件
+            File file = ResourceUtils.getFile("classpath:prompt-templates/system-prompt.txt");
+            this.systemPromptTemplate = Files.readString(file.toPath());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load system prompt template", e);
+        }
+
         // 设置系统提示信息，告知AI模型的角色和任务
-        this.chatClient = chatClientBuilder.defaultSystem(
-                        """
-                                您是火车订票系统的客户聊天支持代理。请以友好、乐于助人且愉快的方式来回复。
-                                您正在通过在线聊天系统与客户互动。
-                                在提供查询车票列表之前，您必须始终
-                                从用户处获取以下信息：出发城市、目的城市、出发日期。
-                                在询问用户之前，请检查消息历史记录以获取此信息。
-                                在订票之前，请先获取车次信息及乘客姓名、证件号等并且用户确定之后才进行订票。
-                                请讲中文。
-                                今天的日期是 {current_date}.
-                                """
-                )
+        this.chatClient = chatClientBuilder.defaultSystem(systemPromptTemplate)
 
                 // 添加默认的顾问，用于处理聊天请求和响应
                 .defaultAdvisors(
@@ -60,22 +71,58 @@ public class OpenAiController  {
                 .build();
     }
 
+
     /**
-     * 处理用户的聊天请求，返回AI生成的响应流
+     * 处理用户的聊天请求，返回AI生成的响应
      * @param message 用户输入的消息，默认为“讲个笑话”
-     * @return AI生成的响应流
+     * @return AI生成的响应
      */
     @CrossOrigin
-    @GetMapping(value = "/generateStreamAsString")
-    public String generateStreamAsString(@RequestParam(value = "message", defaultValue = "讲个笑话") String message) {
-        System.out.println("啦啦啦啦啦啦啦啦啦AI   message:"+message);
+    @GetMapping(value = "/generateAnswer", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> generateAnswer(
+            @RequestParam(value = "message") String message) {
 
-        // 构建聊天请求，包括用户消息、系统提示信息和顾问参数
-        return this.chatClient.prompt()
-                .user(message)
-                .system(spec -> spec.param("current_date", LocalDate.now().toString()))
-                .advisors(advisorSpec -> advisorSpec.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100))
-                .call()
-                .content();
+        Map<String, Object> finalResponse = new LinkedHashMap<>();
+        finalResponse.put("timestamp", Instant.now().toString());
+
+        try {
+            // 调用AI并获取结构化响应
+            String aiRawResponse = this.chatClient.prompt()
+                    .user(message)
+                    .system(spec -> spec.param("current_date", LocalDate.now().toString()))
+                    .call()
+                    .content();
+            System.out.println(aiRawResponse);
+
+            // 解析AI返回的原始JSON
+            Map<String, Object> aiResponse = objectMapper.readValue(aiRawResponse,
+                    new TypeReference<Map<String, Object>>() {});
+
+            // 统一封装为前端需要的结构
+            finalResponse.put("status", "success");
+            finalResponse.put("type", aiResponse.get("type"));
+            finalResponse.put("content", aiResponse.get("content"));
+
+            return ResponseEntity.ok(finalResponse);
+
+        } catch (JsonProcessingException e) {
+            // AI返回格式错误时的处理
+            finalResponse.put("status", "error");
+            finalResponse.put("type", "error");
+            finalResponse.put("content", Map.of(
+                    "text", "AI响应格式异常，请稍后重试",
+                    "code", "AI_FORMAT_ERROR"
+            ));
+            return ResponseEntity.status(500).body(finalResponse);
+        } catch (Exception e) {
+            // 其他异常处理
+            finalResponse.put("status", "error");
+            finalResponse.put("type", "error");
+            finalResponse.put("content", Map.of(
+                    "text", "系统繁忙，请稍后重试",
+                    "code", "SERVER_ERROR"
+            ));
+            return ResponseEntity.status(500).body(finalResponse);
+        }
     }
 }

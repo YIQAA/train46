@@ -3,7 +3,9 @@ package com.qdu.common;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.qdu.dto.domain.TicketListDTO;
+import com.qdu.dto.resp.AIchat.AiQueryTicketListDTO;
 import com.qdu.dto.resp.ticketList.TicketPageQueryRespDTO;
+import com.qdu.service.impl.AIChatService;
 import com.qdu.service.impl.TicketServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,6 +29,8 @@ public class AIServiceTools {
 
 	@Autowired
 	TicketServiceImpl ticketService;
+	@Autowired
+	AIChatService aiChatService;
 
 
 	@Data
@@ -54,7 +58,7 @@ public class AIServiceTools {
 //		private int totalPages;
 
 		private int code;
-		private List<TicketListDTO> tickets;
+		private List<AiQueryTicketListDTO> tickets;
 		private String errorMsg;
 	}
 
@@ -71,13 +75,11 @@ public class AIServiceTools {
 				}
 				System.out.println("+++++++++++++++++++++++++++++BeanForAI   2++++++++++++++++++++++++++++++"+params.getDepartureDate());
 				// 调用业务Service
-				List<TicketListDTO> tickets = ticketService.listTicketPageQueryForAIService(
+				List<AiQueryTicketListDTO> tickets = aiChatService.listTicketQueryForAIService(
 						params.getDepartureCity(),
 						params.getDestinationCity(),
 						params.getDepartureDate()
-
 				);
-
 				return new TicketQueryResult(0, tickets, null);
 			} catch (Exception e) {
 				return new TicketQueryResult(500, null, "查询失败: " + e.getMessage());

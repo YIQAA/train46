@@ -1,13 +1,10 @@
 package com.qdu.service;
 
-import com.qdu.dto.domain.TrainInfo;
-import com.qdu.entity.DailyTrain;
+import com.qdu.dto.domain.StationToStationRouteDTO;
 import com.qdu.entity.Train;
 import com.baomidou.mybatisplus.extension.service.IService;
-import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -23,13 +20,13 @@ public interface ITrainsService extends IService<Train> {
 
     //TicketSearchController
     //根据两城市查询车次信息
-    List<TrainInfo> findTrainsByCityCodes(String depCityCode,String arrCityCode, LocalDate date);
+    List<StationToStationRouteDTO> findTrainsByCityCodes(String depCityCode, String arrCityCode, LocalDate date);
     //根据车次和日期查trainid
     String getTrainIdByNumberAndDate(String trainNumber, LocalDate departureDate);
 
     //OrdersController
     //根据trainId、出发车站、到达车站查询车次信息
-    TrainInfo findTrainInfoByTrainId(Integer trainId, Integer startStationId, Integer endStationId);
+    StationToStationRouteDTO findTrainInfoByTrainId(Integer trainId, Integer startStationId, Integer endStationId);
 
     //根据trainId查询出发日期
     LocalDate findDepartureDateByTrainId(Integer trainId);

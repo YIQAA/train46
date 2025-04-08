@@ -33,12 +33,12 @@ import java.util.Date;
 public class TicketPageQueryReqDTO extends PageRequest {
 
     /**
-     * 出发城市
+     * 出发城市 code
      */
     private String fromCity;
 
     /**
-     * 目的城市
+     * 目的城市 code
      */
     private String toCity;
 

@@ -1,143 +1,317 @@
-
-
 <template>
+  <a-layout class="chat-container">
+    <a-layout-content class="chat-content">
+      <div class="chat-messages" ref="messagesContainer">
+        <div
+            v-for="message in messages"
+            :key="message.id"
+            :class="['message', message.isUser ? 'user-message' : 'bot-message']"
+        >
+          <a-comment>
+            <template #avatar>
+              <a-avatar
+                  :style="message.isUser ? { backgroundColor: '#1890ff' } : { backgroundColor: '#f56a00' }"
+              >
+                {{ message.isUser ? '我' : 'AI' }}
+              </a-avatar>
+            </template>
+            <template #content>
+              <div class="rich-content">
+                <!-- 文本类型 -->
+                <template v-if="message.type === 'text'">
+                  <div v-html="message.content"></div>
+                </template>
 
-  <el-row :gutter="20">
-    <el-col :span="16">
+                <!-- 链接类型 -->
+                <div v-if="message.type === 'link'" class="content-link">
+                  <a :href="message.url" target="_blank">{{ message.content }}</a>
+                </div>
 
-      <el-table :data="tableData" stripe style="width: 100%">
-        <el-table-column prop="bookingNumber" label="#"   />
-        <el-table-column prop="name" label="Name" />
-        <el-table-column prop="date" label="Date" />
-        <el-table-column prop="from" label="From" />
-        <el-table-column prop="to" label="To" />
-        <el-table-column prop="bookingStatus" label="Status" >
-          <template #default="scope">
-            {{ scope.row.bookingStatus === "CONFIRMED" ? "✅" : "❌"}}
-          </template>
-        </el-table-column>
-        <el-table-column prop="bookingClass" label="Booking class" />
-        <el-table-column label="Operations" fixed="right" width="180" >
-          <template #default="scope">
-            <el-button size="small"
-                       type="primary">
-              更改预定
-            </el-button>
-            <el-button
-                size="small"
-                type="danger">
-              退订
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-col>
+                <!-- 表格类型 -->
+                <div v-if="message.type === 'table'" class="content-table">
+                  <a-table
+                      :columns="message.columns"
+                      :data-source="message.data"
+                      :pagination="false"
+                      size="small"
+                  />
+                </div>
 
-    <el-col :span="8" style="background-color: aliceblue;">
-      <div style="height: 500px;overflow: scroll">
-        <el-timeline style="max-width: 100%">
-          <el-timeline-item
-              v-for="(activity, index) in activities"
-              :key="index"
-              :icon="activity.icon"
-              :type="activity.type"
-              :color="activity.color"
-              :size="activity.size"
-              :hollow="activity.hollow"
-              :timestamp="activity.timestamp"
-          >
-            {{ activity.content }}
-          </el-timeline-item>
-        </el-timeline>
-      </div>
-      <div id="container">
-        <div id="chat">
-          <el-input
-              v-model="msg"
-              input-style="width: 100%;height:50px"
-              :rows="2"
-              type="text"
-              placeholder="Please input"
-              @keydown.enter="sendMsg();"
-          />
-          <el-button  @click="sendMsg()">发送</el-button>
+                <!-- 按钮组类型 -->
+                <div v-if="message.type === 'buttons'" class="content-buttons">
+                  <a-button
+                      v-for="(btn, index) in message.buttons"
+                      :key="index"
+                      type="primary"
+                      size="small"
+                      @click="handleButtonClick(btn)"
+                      class="action-btn"
+                  >
+                    {{ btn.text }}
+                  </a-button>
+                </div>
+              </div>
+            </template>
+          </a-comment>
         </div>
       </div>
-    </el-col>
-  </el-row>
+    </a-layout-content>
 
+    <a-layout-footer class="input-footer">
+      <div class="input-area">
+        <a-input
+            v-model:value="userInput"
+            @pressEnter="sendMessage"
+            placeholder="请输入您的问题..."
+            class="message-input"
+            size="large"
+        >
+          <template #suffix>
+            <a-button
+                type="primary"
+                shape="circle"
+                icon="发送"
+                @click="sendMessage"
+                :loading="sending"
+                class="send-btn"
+            />
+          </template>
+        </a-input>
+      </div>
+    </a-layout-footer>
+  </a-layout>
 </template>
-<script lang="ts">
-import { MoreFilled } from '@element-plus/icons-vue'
-import {ref, onMounted} from "vue";
-import axios from 'axios'//引入axios
+<script setup>
+import { ref, reactive, nextTick } from 'vue';
+import { fetchMessageByAI } from "@/service/index.js";
 
-export default {
-  setup() {
+// 响应式数据
+const userInput = ref('');
+const messages = ref([
+  {
+    id: 1,
+    type: 'text',
+    content: '您好！我是火车票务助手，请问有什么可以帮您？',
+    isUser: false
+  }
+]);
+const sending = ref(false);
+const messagesContainer = ref(null);
 
+// 事件处理
+const handleButtonClick = (btn) => {
+  messages.value.push({
+    id: Date.now(),
+    type: 'text',
+    content: btn.command,
+    isUser: true
+  });
+  getBotResponse(btn.command);
+};
 
-    const activities = ref([
-      {
-        content: '⭐欢迎来到图灵航空✈！请问有什么可以帮您的?',
-        timestamp: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString(),
-        color: '#0bbd87',
-      },
-    ]);
-    const msg = ref('');
-    const tableData = ref([]);
-    let count = 2;
-    let eventSource;
-
-    // 发送消息
-    const sendMsg = () => {
-      if (eventSource) {
-        eventSource.close();
-      }
-      activities.value.push(
-          {
-            content: `你:${msg.value}`,
-            timestamp: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString(),
-            size: 'large',
-            type: 'primary',
-            icon: MoreFilled,
-          },
-      );
-
-      // sse: 服务端推送 Server-Sent Events
-      eventSource = new EventSource(`http://localhost:8080/ai/generateStreamAsString?message=${msg.value}`);
-      msg.value='';
-      eventSource.onmessage = (event) => {
-        if (event.data === '[complete]') {
-          count = count + 2;
-          eventSource.close();
-          return;
-        }
-        activities.value[count].content += event.data;
-      };
-      eventSource.onopen = (event) => {
-        activities.value[count].content = '';
-      };
+// 获取AI回复
+const getBotResponse = async (input, tempId) => {
+  try {
+    const response = await fetchMessageByAI({ message: input });
+    const index = messages.value.findIndex(msg => msg.id === tempId);
+    console.log('获取AI回复:', response);
+    const newMessage = {
+      id: tempId,
+      type: 'text',
+      content: response,
+      isUser: false
     };
 
-
-
-    return {
-      activities,
-      msg,
-      tableData,
-      sendMsg
+    if (index !== -1) {
+      messages.value.splice(index, 1, newMessage);
+    } else {
+      messages.value.push(newMessage);
+    }
+  } catch (error) {
+    console.error('获取AI回复出错:', error);
+    const errorMessage = {
+      id: tempId,
+      type: 'text',
+      content: '获取回复时出现错误，请稍后再试。',
+      isUser: false
     };
-  },
+
+    const index = messages.value.findIndex(msg => msg.id === tempId);
+    if (index !== -1) {
+      messages.value.splice(index, 1, errorMessage);
+    } else {
+      messages.value.push(errorMessage);
+    }
+  }
+};
+
+// 发送消息
+const sendMessage = async () => {
+  const input = userInput.value.trim();
+  if (!input || sending.value) return;
+
+  sending.value = true;
+
+  // 添加用户消息
+  messages.value.push({
+    id: Date.now(),
+    type: 'text',
+    content: input,
+    isUser: true
+  });
+
+  // 添加临时AI消息
+  const tempId = Date.now() + 1;
+  messages.value.push({
+    id: tempId,
+    type: 'text',
+    content: '正在思考中...',
+    isUser: false
+  });
+
+  // 立即滚动到底部
+  await nextTick();
+  messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+
+  userInput.value = '';
+
+  try {
+    await getBotResponse(input, tempId);
+  } finally {
+    sending.value = false;
+    // 最终滚动到底部
+    await nextTick();
+    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+  }
 };
 </script>
-<style scoped>
-* {
-  margin: 0;
-  padding: 0;
+
+<style scoped lang="less">
+.rich-content {
+  .content-link {
+    a {
+      color: @primary-color;
+      text-decoration: underline;
+    }
+  }
+
+  .content-table {
+    margin: 10px 0;
+
+    :deep(.ant-table) {
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+    }
+  }
+
+  .content-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+
+    .action-btn {
+      border-radius: 15px;
+      padding: 0 15px;
+    }
+  }
 }
-#chat button{
-  position: absolute;
-  margin-left: -60px;
-  margin-top: 19px;
+.message.loading-message :deep(.ant-comment-content) {
+  color: #999;
+  font-style: italic;
+}
+
+// 修改样式部分
+.input-footer {
+  padding: 16px;
+  border-top: 1px solid #e8e8e8;
+  background: #fff;
+
+  .input-area {
+    display: flex;
+    width: 100%;
+
+    :deep(.ant-input-affix-wrapper) {
+      flex: 1;
+      width: 100%;
+    }
+
+    :deep(.ant-input) {
+      border-radius: 24px;
+      padding: 12px 24px;
+      width: 100%;
+    }
+
+    :deep(.ant-btn) {
+      margin-left: 12px;
+      width: 40px;
+      height: 40px;
+    }
+  }
+}
+
+
+.chat-container {
+  max-width: 800px;
+  margin: 20px auto;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  overflow: hidden;
+
+  .chat-content {
+    height: 500px;
+    padding: 16px;
+    background-color: #fafafa;
+  }
+
+  .chat-messages {
+    height: 100%;
+    overflow-y: auto;
+    padding: 16px;
+
+    .message {
+      margin: 12px 0;
+
+      :deep(.ant-comment-content) {
+        padding: 12px 16px;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+      }
+    }
+
+    .user-message {
+      :deep(.ant-comment-content) {
+        background-color: @primary-1;
+        border: 1px solid @primary-3;
+      }
+    }
+
+    .bot-message {
+      :deep(.ant-comment-content) {
+        background-color: #fff;
+        border: 1px solid #e8e8e8;
+      }
+    }
+  }
+
+
+}
+
+// 滚动条样式
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border-radius: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #bfbfbf;
 }
 </style>

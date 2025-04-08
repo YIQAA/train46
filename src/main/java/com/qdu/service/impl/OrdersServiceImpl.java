@@ -3,7 +3,7 @@ package com.qdu.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.qdu.common.page.PageResponse;
-import com.qdu.dto.domain.TrainInfo;
+import com.qdu.dto.domain.StationToStationRouteDTO;
 import com.qdu.dto.req.order.TicketOrderCreateReqDTO;
 import com.qdu.dto.req.order.TicketOrderItemCreateReqDTO;
 import com.qdu.dto.req.order.TicketOrderPageQueryReqDTO;
@@ -25,12 +25,9 @@ import org.springframework.util.CollectionUtils;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * <p>
@@ -59,23 +56,23 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         // 获取车次信息
         Integer startStationId = stationsService.getStationIdByName(requestParam.getDepartureStation());
         Integer endStationId = stationsService.getStationIdByName(requestParam.getArrivalStation());
-        TrainInfo trainInfo = trainsService.findTrainInfoByTrainId(requestParam.getTrainId(), startStationId, endStationId);
+        StationToStationRouteDTO stationToStationRouteDTO = trainsService.findTrainInfoByTrainId(requestParam.getTrainId(), startStationId, endStationId);
         LocalDate departureDate = trainsService.findDepartureDateByTrainId(requestParam.getTrainId());
 
 
 
-        String orderSn = generateOrderId(String.valueOf(requestParam.getUserId()), trainInfo.getTrainNumber(),departureDate);
+        String orderSn = generateOrderId(String.valueOf(requestParam.getUserId()), stationToStationRouteDTO.getTrainNumber(),departureDate);
 
         Orders orders = new Orders();
         orders.setOrderNumber(orderSn);
         orders.setUserId(requestParam.getUserId());
         orders.setTrainId(requestParam.getTrainId());
-        orders.setTrainNumber(trainInfo.getTrainNumber());
+        orders.setTrainNumber(stationToStationRouteDTO.getTrainNumber());
         orders.setTrainDate(departureDate);
         orders.setStartStationId(startStationId);
         orders.setEndStationId(endStationId);
-        orders.setDepartureTime(LocalTime.parse(trainInfo.getDepartureTime()));
-        orders.setArrivalTime(LocalTime.parse(trainInfo.getArrivalTime()));
+        orders.setDepartureTime(LocalTime.parse(stationToStationRouteDTO.getDepartureTime()));
+        orders.setArrivalTime(LocalTime.parse(stationToStationRouteDTO.getArrivalTime()));
         orders.setPaymentAmount(0);
         orders.setStatus(0);
         // 插入订单主表
@@ -85,7 +82,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         System.out.println("订单id："+orderId);
 
         System.out.println("=====================火车信息===========================");
-        System.out.println(trainInfo);
+        System.out.println(stationToStationRouteDTO);
 
         // 处理乘客信息
         List<TicketOrderItemCreateReqDTO> passengers = requestParam.getPassengers();
@@ -143,7 +140,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderPassengers.setPassengerIdCard(passengers.get(i).getIdCard());
             orderPassengers.setTicketType(passengers.get(i).getTicketType());
             Double amount = 0.0;
-            amount = seatMapper.selectSeatPriceByType(passengers.get(i).getSeatType()) * trainInfo.getDistance();
+            amount = seatMapper.selectSeatPriceByType(passengers.get(i).getSeatType()) * stationToStationRouteDTO.getDistance();
             if (passengers.get(i).getTicketType() == 1) amount = amount * 0.8;
             orderPassengers.setAmount(amount.intValue());
             oderAmount += orderPassengers.getAmount();
