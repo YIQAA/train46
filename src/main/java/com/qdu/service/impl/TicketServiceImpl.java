@@ -84,24 +84,16 @@ public class TicketServiceImpl implements ITicketService {
 
     }
 
-    //ai适用方法，根据城市名和日期查询
-    public List<TicketListDTO> listTicketPageQueryForAIService(String fromCity, String toCity, LocalDate departureDate) {
-        List<TicketListDTO> dtos = new ArrayList<>();
-        System.out.println("+++++++++++++++++++++++++++++ai的service ++++++++++++++++++++++++++++++");
-        System.out.println(fromCity+"  "+toCity+"  "+departureDate);
-        String fromCityCode = stationMapper.getCityCodeByName(fromCity);
-        String toCityCode = stationMapper.getCityCodeByName(toCity);
-        TicketPageQueryReqDTO requestParam = new TicketPageQueryReqDTO();
-        requestParam.setFromCity(fromCityCode);
-        requestParam.setToCity(toCityCode);
-        requestParam.setDepartureDate(departureDate);
+    @Override
+    public boolean cancelOrder(String orderSn) {
 
-        dtos = listTicketPageQuery(requestParam).getTrainList();
 
-        System.out.println("+++++++++++++++++++++++++++++ai的service的resp++++++++++++++++++++++++++++++");
-        System.out.println(requestParam);
-        System.out.println(dtos);
-        return dtos;
+
+
+
+
+
+        return false;
     }
 
     // 将分钟数转换为小时分钟表示

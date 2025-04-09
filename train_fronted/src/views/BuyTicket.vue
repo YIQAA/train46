@@ -73,6 +73,7 @@ const currPassenger = ref([])
 onMounted(() => {
 
   const username = JSON.parse(localStorage.getItem('userName'))
+  console.log(username)
   // 获取用户信息
   fetchUserPassenger({
     userName: username

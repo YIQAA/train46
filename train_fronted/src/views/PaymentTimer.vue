@@ -77,21 +77,7 @@
           }"
         >
           <Space size="large">
-            <Button
-              @click="
-                () => {
-                  fetchOrderCancel({ orderSn: query?.sn }).then((res) => {
-                    if (res.success) {
-                      message.success('订单取消成功')
-                      router.push('/ticketSearch')
-                    } else {
-                      message.error(res.message)
-                    }
-                  })
-                }
-              "
-              >取消订单</Button
-            >
+            <Button @click="() =>cancelOrder1(state.currentInfo?.orderSn)">取消订单</Button>
             <Button
               :style="{
                 backgroundColor: '#ff8001',
@@ -289,10 +275,7 @@ const columns = [
 ]
 onMounted(() => {
   getOrder().then(() => {
-    // if (!state.currentInfo?.orderTime) {
-    //   message.error('订单时间获取失败')
-    //   return router.push('/ticketSearch')
-    // }
+
     console.log("订单时间：", state.currentInfo.orderTime)
 
     // 解析订单时间（假设为本地时间）
@@ -313,6 +296,7 @@ onMounted(() => {
         clearInterval(timer)
         handleTimeout()
       }
+      console.log("剩余时间：", state.count)
       getOrderStatus()
     }, 1000)
   })
@@ -320,9 +304,36 @@ onMounted(() => {
 
 // 超时处理函数
 const handleTimeout = () => {
-  message.error("支付超时，订单已取消")
-  router.push("/ticketSearch")
+  fetchOrderCancel({ orderSn: query?.sn }).then((res) => {
+    if (res) {
+      message.error("支付超时，订单已取消")
+    } else {
+      message.error( "订单取消失败")
+    }
+    router.push("/ticketSearch")
+  }).catch((error) => {
+    message.error("取消订单请求异常")
+    console.error(error)
+    router.push("/ticketSearch")
+  })
 }
+// 取消订单
+const cancelOrder1 = (sn) => {
+  console.log('取消订单', sn);
+  fetchOrderCancel({orderSn: sn})
+      .then((res) => {
+        if (res) {
+          message.success('订单取消成功');
+          router.push("/ticketSearch")
+        }
+      })
+      .catch((err) => {
+        console.error('取消订单失败', err);
+        message.error('取消订单失败，请稍后重试');
+      });
+};
+
+
 // 时间显示格式化（保持两位数）
 const formatTime = (time) => {
   const minutes = Math.floor(time / 60000)
@@ -359,49 +370,56 @@ const totalAmount = computed(() => {
   return amount
 })
 
-//支付
+// 支付方法，接收支付渠道作为参数
 const handlePay = (channel) => {
+  // 检查支付渠道是否不为 0
   if (channel !== 0) {
+    // 如果不为 0，提示用户该支付方式暂未对接
     return message.error('该支付方式暂未对接，请稍候...')
   }
+  // 标记为已发起支付请求
   state.isInitiatePayment = true
+  // 关闭支付选择模态框
   state.open = false
+  // 打开支付中提示模态框
   state.isPayingOpen = true
-  const body = {
-    channel: 0,
-    tradeType: 0,
-    orderSn: query.sn,
-    totalAmount: totalAmount.value,
-    outOrderSn: query.orderSn,
-    subject: `${state.currentInfo.departure}-${state.currentInfo.arrival}`
-  }
-  fetchPay(body).then((res) => {
-    state.html = res.data?.body
-    window.open(`/aliPay?body=${encodeURIComponent(res.data?.body)}`)
 
-    // state.loading = true
-    // setTimeout(() => {
-    //   state.loading = false
-    //   window.open(`/aliPay?body=${encodeURIComponent(res.data?.body)}`)
-    // }, 500)
+
+  // 调用 fetchPay 函数发起支付请求
+  fetchPay({orderSn:query.sn}).then((res) => {
+    console.log("支付结果：", res)
+    if (res) {
+      state.loading = true
+      setTimeout(() => {
+        state.loading = false
+        return message.success('支付成功')
+      }, 1000)
+    }
   })
 }
-const PaymentCompleted = () => {
 
-}
 
+// 获取订单状态的方法
 const getOrderStatus = () => {
-  state.isInitiatePayment &&
+  // 检查是否已经发起支付请求
+  if (state.isInitiatePayment) {
+    // 调用 fetchOrderStatus 方法，传入订单编号，获取订单状态
     fetchOrderStatus({ orderSn: query?.sn })
-      .then((res) => {
-        state.isPaying = res.status === 0
-        res.status === 2 &&
-          router.push(`/paySuccess?orderSn=${res.orderSn}`)
-      })
-      .catch((error) => {
-        console.log('error:::', error)
-      })
-}
+        .then((res) => {
+          // 根据返回的订单状态更新 isPaying 状态
+          // 如果订单状态为 0，表示正在支付，将 isPaying 设置为 true
+          state.isPaying = res === 0;
+          // 如果订单状态为 2，表示支付成功，跳转到支付成功页面
+          if (res === 1) {
+            router.push(`/paySuccess?orderSn=${query?.sn}`);
+          }
+        })
+        .catch((error) => {
+          // 若请求出错，在控制台输出错误信息
+          console.log('error:::', error);
+        });
+  }
+};
 </script>
 
 <style lang="scss" scoped>

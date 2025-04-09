@@ -3,6 +3,7 @@ import Login from '../views/Login.vue';
 import BuyTicket from "@/views/BuyTicket.vue";
 import PaymentTimer from "@/views/PaymentTimer.vue";
 import OrderList from '@/views/order-list/index.vue'
+import PaySuccess from "@/views/PaySuccess.vue";
 
 
 const routes = [
@@ -61,6 +62,14 @@ const routes = [
             path: '/orderList',
             name: 'orderList',
             component: OrderList,
+            icon: 'icon-zhifubao0',
+            meta: { requiresAuth: true }
+        },
+        {
+            label: '支付成功',
+            path: '/paySuccess',
+            name: 'paySuccess',
+            component: PaySuccess,
             icon: 'icon-zhifubao0',
             meta: { requiresAuth: true }
         }

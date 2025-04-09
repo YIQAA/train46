@@ -11,8 +11,13 @@ import java.util.List;
 
 public interface ITicketService {
 
+
+    //根据城市code和日期，查询车票信息
     List<TicketListDTO> listTicketQuery(String fromCityCode, String toCityCode, LocalDate departureDate);
 
-
+    //余票查询页面，分页查询车票信息
     TicketPageQueryRespDTO listTicketPageQuery(TicketPageQueryReqDTO ticketPageQueryReqDTO);
+
+    //取消订单
+    boolean cancelOrder(String orderSn);
 }

@@ -19,6 +19,33 @@ const fetchRegister = async (body) => {
   })
   return data
 }
+// 退出
+const fetchLogout = async (body) => {
+  const { data } = await http({
+    method: 'GET',
+    url: '/api/user-service/logout',
+    data: body
+  })
+  http.defaults.headers.common['Authorization'] = null
+  return data
+}
+
+
+
+// 将用户输入内容返回到后端ai
+const fetchMessageByAI = async (params) => {
+  const { data } = await http({
+    method: 'GET',
+    url: '/api/AIchat-service/generateAnswer',
+    params,
+    headers: {
+      'Accept': 'application/json'
+      // 'Accept': 'text/event-stream'
+    }
+  });
+  return data;
+};
+
 
 
 
@@ -54,45 +81,26 @@ const fetchStationAll = async () => {
 
 
 
-// 车站查询
-const fetchRegionStation = async (params) => {
+
+// 订单列表
+const fetchTicketList = async (params) => {
   const { data } = await http({
     method: 'GET',
-    url: '/api/ticket-service/region-station/query',
+    url: '/api/order-service/order/ticket/page',
+    params
+  })
+  return data
+}
+// 取消订单
+const fetchOrderCancel = async (params) => {
+  const { data } = await http({
+    method: 'POST',
+    url: '/api/order-service/order/ticket/cancel',
     params
   })
   return data
 }
 
-
-
-
-
-
-// 退出
-const fetchLogout = async (body) => {
-  const { data } = await http({
-    method: 'GET',
-    url: '/api/user-service/logout',
-    data: body
-  })
-  http.defaults.headers.common['Authorization'] = null
-  return data
-}
-
-// 将用户输入内容返回到后端ai
-const fetchMessageByAI = async (params) => {
-  const { data } = await http({
-    method: 'GET',
-    url: '/api/AIchat-service/generateAnswer',
-    params,
-    headers: {
-      'Accept': 'application/json'
-      // 'Accept': 'text/event-stream'
-    }
-  });
-  return data;
-};
 // 根据订单号查询订单
 const fetchOrderBySn = async (params) => {
   const { data } = await http({
@@ -113,15 +121,46 @@ const fetchBuyTicket = async (body) => {
 
   return data
 }
-// 支付
-const fetchPay = async (body) => {
+
+// 乘客查询
+export const fetchUserPassenger = async (params) => {
   const { data } = await http({
-    method: 'POST',
-    url: '/api/pay-service/pay/create',
-    data: body
+    method: 'GET',
+    url: '/api/order-service/user/passenger',
+    params
   })
   return data
 }
+
+
+// 支付
+const fetchPay = async (params) => {
+  const { data } = await http({
+    method: 'POST',
+    url: '/api/pay-service/pay/create',
+    params
+  })
+  return data
+}
+// 订单状态
+const fetchOrderStatus = async (params) => {
+  const { data } = await http({
+    method: 'GET',
+    url: '/api/pay-service/payStatus/query',
+    params
+  })
+  return data
+}
+
+
+
+
+
+
+
+
+
+
 
 // 用户信息
 const fechUserInfo = async (params) => {
@@ -132,15 +171,7 @@ const fechUserInfo = async (params) => {
   })
   return data
 }
-// 乘客查询
-export const fetchUserPassenger = async (params) => {
-  const { data } = await http({
-    method: 'GET',
-    url: '/api/order-service/user/passenger',
-    params
-  })
-  return data
-}
+
 // 乘客删除
 const fetchDeletePassenger = async (body) => {
   const { data } = await http({
@@ -169,24 +200,7 @@ const fetchEditPassenger = async (body) => {
   return data
 }
 
-// 订单列表
-const fetchTicketList = async (params) => {
-  const { data } = await http({
-    method: 'GET',
-    url: '/api/order-service/order/ticket/page',
-    params
-  })
-  return data
-}
-// 取消订单
-const fetchOrderCancel = async (body) => {
-  const { data } = await http({
-    method: 'POST',
-    url: '/api/ticket-service/ticket/cancel',
-    data: body
-  })
-  return data
-}
+
 // 修改用户信息
 const fetchUserUpdate = async (body) => {
   const { data } = await http({
@@ -196,15 +210,7 @@ const fetchUserUpdate = async (body) => {
   })
   return data
 }
-// 订单状态
-const fetchOrderStatus = async (params) => {
-  const { data } = await http({
-    method: 'GET',
-    url: '/api/pay-service/pay/query/order-sn',
-    params
-  })
-  return data
-}
+
 // 我的票
 const fetchMyTicket = async (params) => {
   const { data } = await http({
@@ -221,6 +227,16 @@ const fetchRefundTicket = async (body) => {
     url: '/api/ticket-service/ticket/refund',
     data: body
   })
+}
+
+// 车站查询
+const fetchRegionStation = async (params) => {
+  const { data } = await http({
+    method: 'GET',
+    url: '/api/ticket-service/region-station/query',
+    params
+  })
+  return data
 }
 
 export {

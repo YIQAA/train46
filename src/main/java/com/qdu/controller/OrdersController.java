@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/order-service")
+
 public class OrdersController {
 
     @Autowired
@@ -54,24 +55,21 @@ public class OrdersController {
         System.out.println(requestParam);
         return orderService.pageTicketOrderList(requestParam);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
+    /**
+     * 取消订单
+     */
+    @PostMapping("/order/ticket/cancel")
+    public Boolean cancelTickOrder(@RequestParam (value = "orderSn") String orderSn) {
+        System.out.println("**************************************取消订单*********************************");
+        System.out.println(orderSn);
+        return orderService.cancelOrder(orderSn);
+    }
 
 
     //获取userpassenger信息
     @RequestMapping("/user/passenger")
-    public UserPassengerRespDTO getUserPassenger(String userName) {
+    public UserPassengerRespDTO getUserPassenger(@RequestParam (value = "userName") String userName) {
+        System.out.println("**************************************获取userpassenger信息="+userName+"*********************************");
         return userService.getUserPassenger(userName);
     }
 

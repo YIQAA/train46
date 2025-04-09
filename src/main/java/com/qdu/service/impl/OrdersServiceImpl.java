@@ -25,6 +25,7 @@ import org.springframework.util.CollectionUtils;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -155,11 +156,53 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return orderSn;
     }
 
+
+    /**
+    * 取消订单（支持多座位解锁）
+    * @param orderSn 订单号
+    * @return true-取消成功, false-订单不存在或状态不可取消
+    */
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean cancelOrder(String orderSn) {
+        // 1. 订单状态更新校验
+        int orderUpdateCount = ordersMapper.updateOrderStatusToCanceled(orderSn);
+        if (orderUpdateCount == 0) {
+            return false;
+        }
+        // 2. 执行座位解锁
+        int seatUnlockCount = ordersMapper.unlockSeatsByOrderSn(orderSn);
+        return true;
+    }
+
+    @Override
+    public Integer getOrderStatusByOrderSn(String orderSn) {
+        return ordersMapper.getOrderStatusByOrderSn(orderSn);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean pay(String orderSn) {
+
+        // 1. 更新订单状态（0→1）
+        int orderUpdate = ordersMapper.updateOrderStatusToPaid(orderSn);
+        if (orderUpdate == 0) {
+            return false;
+        }
+
+        // 2. 批量占用座位（locked→occupied）
+        int seatUpdate = ordersMapper.occupySeatsByOrderSn(orderSn);
+        if (seatUpdate == 0) {
+            return false;
+        }
+        return true;
+    }
+
     //根据orderSn查询订单
     public TicketOrderDetailRespDTO queryTicketOrderByOrderSn(String orderSn) {
+        //根据订单号查询  订单实体
         Orders orders = ordersMapper.selectOne(new QueryWrapper<Orders>().eq("order_number", orderSn));
         List<OrderPassengers> orderPassengers = orderPassengersMapper.selectList(new QueryWrapper<OrderPassengers>().eq("order_id", orders.getOrderId()));
 
+        //封装返回数据
         TicketOrderDetailRespDTO ticketOrderDetailRespDTO = new TicketOrderDetailRespDTO();
 
         ticketOrderDetailRespDTO.setOrderSn(orders.getOrderNumber());
@@ -171,6 +214,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         ticketOrderDetailRespDTO.setDepartureTime(orders.getDepartureTime());
         ticketOrderDetailRespDTO.setArrivalTime(orders.getArrivalTime());
         ticketOrderDetailRespDTO.setOrderTime(orders.getCreatedAt());
+        ticketOrderDetailRespDTO.setOrderStatus(orders.getStatus());
 
         List<TicketOrderPassengerDetailRespDTO> passengerDetails = new ArrayList<>();
 
@@ -199,11 +243,15 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return ticketOrderDetailRespDTO;
     }
 
-    //OrderList
+    //OrderList ,订单页面
     public PageResponse<TicketOrderDetailRespDTO> pageTicketOrderList(TicketOrderPageQueryReqDTO requestParam)
     {
+        //  0：未完成 1：未出行 2：历史订单
+        Integer orderStatus = requestParam.getStatusType();
+
         //根据userid查所有orderSn
         List<String> orderSnList = ordersMapper.selectOrderSnByUserId(requestParam.getUserId());
+
         PageResponse<TicketOrderDetailRespDTO> pageResponse = PageResponse.<TicketOrderDetailRespDTO>builder()
                 .current(requestParam.getCurrent())
                 .size(requestParam.getSize())
@@ -212,7 +260,12 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         List<TicketOrderDetailRespDTO> records = new ArrayList<>();
         for (String orderSn : orderSnList)
         {
-            records.add(queryTicketOrderByOrderSn(orderSn));
+            TicketOrderDetailRespDTO ticketOrder = queryTicketOrderByOrderSn(orderSn);
+
+            //如果订单状态符合，则加入列表
+
+            if (orderStatus == 2 && ticketOrder.getOrderStatus() != 0 && ticketOrder.getOrderStatus() != 1) records.add(ticketOrder);
+            else if (orderStatus == ticketOrder.getOrderStatus()) records.add(ticketOrder);
         }
         pageResponse.setRecords(records);
 
@@ -225,8 +278,9 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private static final AtomicInteger sequence = new AtomicInteger(0);
     //生成订单号
     public String generateOrderId(String userId, String trainNumber, LocalDate departureDate) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMdd");
-        String datePart = dateFormat.format(departureDate); // 6位日期
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMMdd");
+        String datePart = formatter.format(departureDate); // 6位日期
 
         // 处理车次编号：提取数字并取后3位，不足补零
         String trainDigits = trainNumber.replaceAll("\\D+", "");

@@ -30,14 +30,9 @@ public class TicketOrderDetailRespDTO {
     private Integer trainId;
 
     /**
-     * 出发站点
+     * 列车车次
      */
-    private String departureStation;
-
-    /**
-     * 到达站点
-     */
-    private String arrivalStation;
+    private String trainNumber;
 
     /**
      * 乘车日期
@@ -46,15 +41,14 @@ public class TicketOrderDetailRespDTO {
     private LocalDate ridingDate;
 
     /**
-     * 订票时间
+     * 出发站点
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime orderTime;
+    private String departureStation;
 
     /**
-     * 列车车次
+     * 到达站点
      */
-    private String trainNumber;
+    private String arrivalStation;
 
     /**
      * 出发时间
@@ -67,6 +61,18 @@ public class TicketOrderDetailRespDTO {
      */
     @JsonFormat(pattern = "HH:mm", timezone = "GMT+8")
     private LocalTime arrivalTime;
+
+    /**
+     * 订票时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime orderTime;
+
+    /**
+     * 订票状态
+     */
+    private Integer orderStatus;
+
 
     /**
      * 乘车人订单详情

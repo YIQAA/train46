@@ -20,4 +20,16 @@ public interface OrdersMapper extends BaseMapper<Orders> {
 
 
     List<String> selectOrderSnByUserId(String userId);
+
+    //订单取消
+    int updateOrderStatusToCanceled(String orderSn);
+    int unlockSeatsByOrderSn(String orderSn);
+
+    //支付
+    int updateOrderStatusToPaid(String orderSn);
+    int occupySeatsByOrderSn(String orderSn);
+
+
+    // 查询订单状态
+    Integer getOrderStatusByOrderSn(String orderSn);
 }

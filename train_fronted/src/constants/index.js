@@ -83,16 +83,16 @@ const TICKET_STATUS_LIST = [
     value: 2
   },
   {
+    label: '已完成',
+    value: 3
+  },
+  {
     label: '已退票',
-    value: 40
+    value: 4
   },
   {
     label: '已改签',
-    value: 50
-  }
-  ,{
-    label: '已进站',
-    value: 20
+    value: 5
   }
 ]
 
