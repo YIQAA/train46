@@ -151,7 +151,14 @@ const fetchOrderStatus = async (params) => {
   })
   return data
 }
-
+// 退票
+const fetchRefundTicket = async (body) => {
+  const { data } = await http({
+    method: 'POST',
+    url: '/api/order-service/ticket/refund',
+    data: body
+  })
+}
 
 
 
@@ -220,14 +227,7 @@ const fetchMyTicket = async (params) => {
   })
   return data
 }
-// 退票
-const fetchRefundTicket = async (body) => {
-  const { data } = await http({
-    method: 'POST',
-    url: '/api/ticket-service/ticket/refund',
-    data: body
-  })
-}
+
 
 // 车站查询
 const fetchRegionStation = async (params) => {

@@ -29,15 +29,16 @@
             }}）{{ state.orderDetail?.trainNumber }}</span
           >
           <span class="small-text">次</span>
-          <span class="main-text">{{ state.orderDetail?.departure }}</span>
+          <span class="main-text">{{ state.orderDetail?.departureStation }}</span>
           <span class="small-text">站</span>
           <span class="main-text"
             >（{{ state.orderDetail?.departureTime }}开）-{{
-              state.orderDetail?.arrival
+              state.orderDetail?.arrivalStation
             }}</span
           >
-          <span class="small-text"
-            >站（{{ state.orderDetail?.arrivalTime }}到）</span
+          <span class="small-text">站</span>
+          <span class="main-text"
+            >（{{ state.orderDetail?.arrivalTime }}到）</span
           >
         </div>
         <Table
@@ -50,7 +51,7 @@
         <Space style="justify-content: center; width: 100%">
           <Button :disabled="true">餐饮·特产</Button>
           <Button @click="router.push('/ticketSearch')">继续购票</Button>
-          <Button @click="router.push('/ticketList')">查询订单详情</Button>
+          <Button @click="router.push('/orderList')">查询订单详情</Button>
         </Space>
       </Card>
     </div>
@@ -130,7 +131,7 @@ const column = [
     dataIndex: 'amount',
     customRender: ({ text }) =>
       h('a', {
-        innerHTML: text / 100 + '¥'
+        innerHTML: text + '元'
       })
   },
   {

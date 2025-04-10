@@ -1,6 +1,8 @@
 package com.qdu.service;
 
+import com.qdu.dto.req.RefundTicketReqDTO;
 import com.qdu.dto.req.order.TicketOrderCreateReqDTO;
+import com.qdu.dto.resp.RefundTicketRespDTO;
 import com.qdu.dto.resp.order.TicketOrderDetailRespDTO;
 import com.qdu.entity.Orders;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -30,4 +32,7 @@ public interface IOrdersService extends IService<Orders> {
     //根据订单号支付
     public Boolean pay(String orderSn);
 
+    //根据订单号退款
+
+    RefundTicketRespDTO commonTicketRefund(RefundTicketReqDTO requestParam);
 }

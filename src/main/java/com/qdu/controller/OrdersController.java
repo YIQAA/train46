@@ -1,14 +1,21 @@
 package com.qdu.controller;
 
+
+import com.qdu.common.convention.result.Result;
+import com.qdu.common.convention.result.Results;
 import com.qdu.common.page.PageResponse;
+import com.qdu.dto.req.RefundTicketReqDTO;
 import com.qdu.dto.req.order.TicketOrderCreateReqDTO;
 import com.qdu.dto.req.order.TicketOrderPageQueryReqDTO;
+import com.qdu.dto.resp.RefundTicketRespDTO;
 import com.qdu.dto.resp.order.TicketOrderDetailRespDTO;
 import com.qdu.dto.resp.ticketList.UserPassengerRespDTO;
 import com.qdu.service.impl.OrdersServiceImpl;
+import com.qdu.service.impl.TicketServiceImpl;
 import com.qdu.service.impl.UsersServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.View;
 
 /**
  * <p>
@@ -27,6 +34,8 @@ public class OrdersController {
     private OrdersServiceImpl orderService;
     @Autowired
     private UsersServiceImpl userService;
+    @Autowired
+    private TicketServiceImpl ticketService;
 
 
     //创建订单
@@ -63,6 +72,15 @@ public class OrdersController {
         System.out.println("**************************************取消订单*********************************");
         System.out.println(orderSn);
         return orderService.cancelOrder(orderSn);
+    }
+    /**
+     * 公共退款接口
+     */
+    @PostMapping("/ticket/refund")
+    public Result<RefundTicketRespDTO> commonTicketRefund(@RequestBody RefundTicketReqDTO requestParam) {
+        System.out.println("**************************************公共退款接口*********************************");
+        System.out.println(requestParam);
+        return Results.success(orderService.commonTicketRefund(requestParam));
     }
 
 

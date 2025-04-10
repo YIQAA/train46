@@ -421,15 +421,16 @@ const handleRefund = () => {
     type: 0,
     subOrderRecordIdReqList: state.refundOrder
   })
-      .then((res) => {
-        state.visible = false;
-        message.success('退款成功');
-        getTicketList(state.current, state.size, state.activeKey);
-      })
-      .catch((err) => {
-        console.error('退票失败', err);
-        message.error('退票失败，请稍后重试');
-      });
+  .then((res) => {
+    console.log('退票返回信息'+res);
+    state.visible = false;
+    message.success('退款成功');
+    getTicketList(state.current, state.size, state.activeKey);
+  })
+  .catch((err) => {
+    console.error('退票失败', err);
+    message.error('退票失败，请稍后重试!!');
+  });
 };
 </script>
 

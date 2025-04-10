@@ -2,11 +2,14 @@ package com.qdu.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.qdu.common.convention.exception.ServiceException;
 import com.qdu.common.page.PageResponse;
 import com.qdu.dto.domain.StationToStationRouteDTO;
+import com.qdu.dto.req.RefundTicketReqDTO;
 import com.qdu.dto.req.order.TicketOrderCreateReqDTO;
 import com.qdu.dto.req.order.TicketOrderItemCreateReqDTO;
 import com.qdu.dto.req.order.TicketOrderPageQueryReqDTO;
+import com.qdu.dto.resp.RefundTicketRespDTO;
 import com.qdu.dto.resp.order.TicketOrderDetailRespDTO;
 import com.qdu.dto.resp.order.TicketOrderPassengerDetailRespDTO;
 import com.qdu.entity.OrderPassengers;
@@ -194,6 +197,62 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             return false;
         }
         return true;
+    }
+
+    @Transactional
+    public RefundTicketRespDTO commonTicketRefund(RefundTicketReqDTO requestParam) {
+        Orders orders = ordersMapper.selectOne(new QueryWrapper<Orders>().eq("order_number", requestParam.getOrderSn()));
+
+        String orderSn = requestParam.getOrderSn();
+        if (orders == null)throw new ServiceException("订单不存在");
+
+        if (orders.getStatus() != 1)throw new ServiceException("当前状态不允许退款");
+        // 退票人员
+        List<String> RefundPassengerList = requestParam.getSubOrderRecordIdReqList();
+        if (RefundPassengerList.size() == 0)throw new ServiceException("退票人员不能为空");
+
+        List<Integer> RefundPassengerIdList = new ArrayList<>();
+        for (String passenger : RefundPassengerList)
+        {
+            Integer passengerId = Integer.valueOf(passenger);
+            RefundPassengerIdList.add(passengerId);
+        }
+        //订单人员
+        List<OrderPassengers> orderPassengers = orderPassengersMapper.selectList(
+                new QueryWrapper<OrderPassengers>().eq("order_id", orders.getOrderId()));
+
+
+        //全部退款 1
+        if (RefundPassengerIdList.size() == orderPassengers.size()){
+            // 更新订单状态（1→4）
+            ordersMapper.update(new Orders(),new UpdateWrapper<Orders>().set("status", 4).eq("order_id", orders.getOrderId()));
+            for (OrderPassengers orderPassenger : orderPassengers){
+                seatMapper.update(new Seat(),new UpdateWrapper<Seat>().set("status", "available")
+                                                                        .eq("seat_id", orderPassenger.getSeatId())
+                                                                        .eq("status", "occupied")   );
+            }
+        }
+        //部分退款 0
+        else{
+            for (OrderPassengers orderPassenger : orderPassengers)
+                for (Integer passengerId : RefundPassengerIdList)
+                {
+                    if (orderPassenger.getPassengerId().equals(passengerId))
+                    {
+                        orderPassengersMapper.deleteById(orderPassenger.getPassengerId());
+                        seatMapper.update(new Seat(),new UpdateWrapper<Seat>().set("status", "available")
+                                                                                .eq("seat_id", orderPassenger.getSeatId())
+                                                                                .eq("status", "occupied"));
+                        ordersMapper.update(new Orders(),
+                                new UpdateWrapper<Orders>()
+                                        .set("payment_amount", orders.getPaymentAmount() - orderPassenger.getAmount())
+                                        .eq("order_id", orders.getOrderId()));
+                    }
+                }
+
+        }
+
+        return null;
     }
 
     //根据orderSn查询订单

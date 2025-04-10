@@ -158,7 +158,7 @@ const columns = [
       customRender: 'trainNumber'
     },
     key: 'trainNumber', // 唯一标识列的key（必填）
-    width: 100, // 列宽度（像素）
+    width: 90, // 列宽度（像素）
     align: 'center', // 内容对齐方式
     // ellipsis: true, // 超出宽度显示省略号（注释状态）
     resizable: false // 禁止调整列宽
@@ -190,7 +190,7 @@ const columns = [
     title: '历时',
     dataIndex: 'duration',
     key: 'duration',
-    width: 130,
+    width: 120,
     ellipsis: true,
     resizable: false,
     align: 'center'
@@ -290,6 +290,7 @@ const columns = [
     dataIndex: 'remark',
     slots: {customRender: 'operation'},
     align: 'center'
+
   }
 ]
 
