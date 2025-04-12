@@ -7,9 +7,11 @@ import com.qdu.dto.resp.ticketList.CityQueryRespDTO;
 import com.qdu.dto.resp.ticketList.TicketPageQueryRespDTO;
 import com.qdu.dto.resp.ticketList.TrainStationQueryRespDTO;
 import com.qdu.mapper.StationMapper;
+import com.qdu.service.impl.StationsServiceImpl;
 import com.qdu.service.impl.TicketServiceImpl;
 import kotlin.Result;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,6 +32,8 @@ public class TicketController {
     private TicketServiceImpl ticketService;
     @Autowired
     private StationMapper stationMapper;
+    @Autowired
+    private StationsServiceImpl stationsService;
 
     //查票列表
     @GetMapping("/ticketQueryList")
@@ -44,12 +48,12 @@ public class TicketController {
     //获取所有城市
     @GetMapping("/city/all")
     public List<CityQueryRespDTO> listAllStation() {
-        return stationMapper.selectCityList();
+        return stationsService.listAllStationWithCache();
     }
 
     //根据trainid查询该车次的所有经过站
     @GetMapping("/train-station/query")
-    public List<TrainStationQueryRespDTO> listTrainStationQuery(String trainId) {
+    public List<TrainStationQueryRespDTO> listTrainStationQuery(@RequestParam ("trainId") String trainId) {
         System.out.println("-----------------根据trainid查询该车次的所有经过站-------------------------");
         System.out.println(stationMapper.getTrainStationByTrainId(trainId));
         return stationMapper.getTrainStationByTrainId(trainId);

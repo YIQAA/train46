@@ -31,21 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class StationController {
 
 
-    private final StationsServiceImpl StationService;
-    private StationMapper stationMapper;
 
-    /**
-     * 根据列车 ID 查询站点信息
-     */
-//    @GetMapping("/api/ticket-service/train-station/query")
-//    public List<TrainStationQueryRespDTO> listTrainStationQuery(String trainId) {
-//        return trainStationService.listTrainStationQuery(trainId);
-//    }
-
-
-    /**
-     * 查询车站站点集合信息
-     */
 
 }
 

@@ -15,17 +15,19 @@ import com.qdu.dto.resp.order.TicketOrderPassengerDetailRespDTO;
 import com.qdu.entity.OrderPassengers;
 import com.qdu.entity.Orders;
 import com.qdu.entity.Seat;
+import com.qdu.entity.Station;
 import com.qdu.mapper.OrderPassengersMapper;
 import com.qdu.mapper.OrdersMapper;
 import com.qdu.mapper.SeatMapper;
+import com.qdu.mapper.StationMapper;
 import com.qdu.service.IOrdersService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -50,7 +52,11 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final UsersServiceImpl usersService ;
     private final OrdersMapper ordersMapper;
     private final SeatMapper seatMapper;
+    private final StationMapper stationMapper;
     private final OrderPassengersMapper orderPassengersMapper;
+
+    private final RedisTemplate<String, Object> redisTemplate;
+
 
 
     // 创建订单
@@ -62,8 +68,6 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Integer endStationId = stationsService.getStationIdByName(requestParam.getArrivalStation());
         StationToStationRouteDTO stationToStationRouteDTO = trainsService.findTrainInfoByTrainId(requestParam.getTrainId(), startStationId, endStationId);
         LocalDate departureDate = trainsService.findDepartureDateByTrainId(requestParam.getTrainId());
-
-
 
         String orderSn = generateOrderId(String.valueOf(requestParam.getUserId()), stationToStationRouteDTO.getTrainNumber(),departureDate);
 
@@ -156,6 +160,22 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 new UpdateWrapper<Orders>()
                         .set("payment_amount", oderAmount)
                         .eq("order_id", orderId));
+
+
+        //删除redis
+        if (true) {
+            // 获取订单的出发城市、到达城市和出发日期
+            // 这里假设可以从订单信息中获取这些数据
+            Station startStation = stationMapper.selectOne(new QueryWrapper<Station>().eq("station_name", requestParam.getDepartureStation()));
+            Station endStation = stationMapper.selectOne(new QueryWrapper<Station>().eq("station_name", requestParam.getArrivalStation()));
+            String fromCity = startStation.getCityCode();
+            String toCity = endStation.getCityCode();
+
+            String queryKey = "ticket:query:" + fromCity + ":" + toCity + ":" + departureDate;
+            String pageQueryKey = "ticket:pageQuery:" + fromCity + ":" + toCity + ":" + departureDate;
+            redisTemplate.delete(queryKey);
+            redisTemplate.delete(pageQueryKey);
+        }
         return orderSn;
     }
 
@@ -221,6 +241,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         List<OrderPassengers> orderPassengers = orderPassengersMapper.selectList(
                 new QueryWrapper<OrderPassengers>().eq("order_id", orders.getOrderId()));
 
+        Boolean isSuccess = false;
 
         //全部退款 1
         if (RefundPassengerIdList.size() == orderPassengers.size()){
@@ -231,6 +252,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                                                                         .eq("seat_id", orderPassenger.getSeatId())
                                                                         .eq("status", "occupied")   );
             }
+            isSuccess = true;
         }
         //部分退款 0
         else{
@@ -249,7 +271,17 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                                         .eq("order_id", orders.getOrderId()));
                     }
                 }
-
+            isSuccess = true;
+        }
+        // 删除Redis缓存
+        if (isSuccess) {
+            String fromCity = "fromCityCode";
+            String toCity = "toCityCode";
+            LocalDate departureDate = LocalDate.now();
+            String queryKey = "ticket:query:" + fromCity + ":" + toCity + ":" + departureDate;
+            String pageQueryKey = "ticket:pageQuery:" + fromCity + ":" + toCity + ":" + departureDate;
+            redisTemplate.delete(queryKey);
+            redisTemplate.delete(pageQueryKey);
         }
 
         return null;

@@ -1,14 +1,18 @@
 package com.qdu.service.impl;
 
+import com.qdu.dto.resp.ticketList.CityQueryRespDTO;
 import com.qdu.dto.resp.ticketList.TrainStationQueryRespDTO;
 import com.qdu.entity.Station;
 import com.qdu.mapper.StationMapper;
 
 import com.qdu.service.IStationsService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -20,6 +24,31 @@ import java.util.List;
  */
 @Service
 public class StationsServiceImpl extends ServiceImpl<StationMapper, Station> implements IStationsService {
+
+
+
+    @Autowired
+    private StationMapper stationMapper;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
+    public List<CityQueryRespDTO> listAllStationWithCache() {
+        System.out.println("查询所有城市");
+        String key = "all_cities";
+        List<CityQueryRespDTO> cities = (List<CityQueryRespDTO>) redisTemplate.opsForValue().get(key);
+        if (cities == null) {
+            System.out.println("redis失效，查询所有城市");
+            cities = stationMapper.selectCityList();
+            // 将查询结果存入 Redis 缓存，设置缓存时间为 1 小时
+            redisTemplate.opsForValue().set(key, cities, 1, TimeUnit.HOURS);
+        }
+        return cities;
+    }
+
+
+
+
 
 
 
