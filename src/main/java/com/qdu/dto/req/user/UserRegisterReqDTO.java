@@ -42,11 +42,6 @@ public class UserRegisterReqDTO {
     private String realName;
 
     /**
-     * 证件类型
-     */
-    private Integer idType;
-
-    /**
      * 证件号
      */
     private String idCard;
@@ -56,38 +51,4 @@ public class UserRegisterReqDTO {
      */
     private String phone;
 
-    /**
-     * 邮箱
-     */
-    private String mail;
-
-    /**
-     * 旅客类型
-     */
-    private Integer userType;
-
-    /**
-     * 审核状态
-     */
-    private Integer verifyState;
-
-    /**
-     * 邮编
-     */
-    private String postCode;
-
-    /**
-     * 地址
-     */
-    private String address;
-
-    /**
-     * 国家/地区
-     */
-    private String region;
-
-    /**
-     * 固定电话
-     */
-    private String telephone;
 }

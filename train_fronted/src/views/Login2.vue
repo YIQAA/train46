@@ -83,7 +83,7 @@
             <FormItem label="用户名" v-bind="registerValidateInfos.username">
               <Input
                   v-model:value="registerForm.username"
-                  placeholder="请输入用户名"
+                  placeholder="请输入注册手机号"
               >
               </Input>
             </FormItem>
@@ -103,14 +103,6 @@
               >
               </Input>
             </FormItem>
-            <!-- 证件类型选择项，绑定了对应的验证信息 registerValidateInfos.idType，设置选项为中国居民身份证，绑定选择值 -->
-            <FormItem label="证件类型" v-bind="registerValidateInfos.idType">
-              <Select
-                  :options="[{ value: 0, label: '中国居民身份证' }]"
-                  v-model:value="registerForm.idType"
-                  placeholder="请选择证件类型"
-              ></Select>
-            </FormItem>
             <!-- 证件号码输入项，绑定了对应的验证信息 registerValidateInfos.idCard -->
             <FormItem label="证件号码" v-bind="registerValidateInfos.idCard">
               <Input
@@ -123,15 +115,7 @@
             <FormItem label="手机号码" v-bind="registerValidateInfos.phone">
               <Input
                   v-model:value="registerForm.phone"
-                  placeholder="请输入手机号码"
-              >
-              </Input>
-            </FormItem>
-            <!-- 邮件输入项，绑定了对应的验证信息 registerValidateInfos.mail -->
-            <FormItem label="邮件" v-bind="registerValidateInfos.mail">
-              <Input
-                  v-model:value="registerForm.mail"
-                  placeholder="请输入邮箱账号"
+                  placeholder="请输入联系电话"
               >
               </Input>
             </FormItem>
@@ -215,10 +199,8 @@ const registerForm = reactive({
   username: '',
   password: '',
   realName: '',
-  idType: 0,
   idCard: '',
-  phone: '',
-  mail: ''
+  phone: ''
 })
 
 // 定义注册表单的验证规则，所有字段都为必填项
@@ -226,7 +208,7 @@ const registerRules = reactive({
   username: [
     {
       required: true,
-      message: '请输入用户名'
+      message: '请输入注册手机号'
     }
   ],
   password: [
@@ -241,12 +223,6 @@ const registerRules = reactive({
       message: '请输入姓名'
     }
   ],
-  idType: [
-    {
-      required: true,
-      message: '请选择证件类型'
-    }
-  ],
   idCard: [
     {
       required: true,
@@ -256,13 +232,7 @@ const registerRules = reactive({
   phone: [
     {
       required: true,
-      message: '请输入电话号码'
-    }
-  ],
-  mail: [
-    {
-      required: true,
-      message: '请输入邮箱'
+      message: '请输入联系电话号码'
     }
   ]
 })
@@ -317,6 +287,8 @@ const handleLogin = async () => {
 
 // 注册表单提交的处理函数
 const registerSubmit = async () => {
+  console.log('注册提交');
+  console.log('注册表单数据:', registerForm);
   try {
     // 验证注册表单
     await registerValidate();
@@ -344,7 +316,7 @@ const registerSubmit = async () => {
 
 <style lang="scss">
 .login-wrapper {
-  background-color: rgba(30, 30, 30, 0.9);
+  background-color: rgb(185, 217, 255);
   width: 100%;
   height: 100vh;
   background-clip: border-box;
@@ -361,7 +333,7 @@ const registerSubmit = async () => {
   margin: auto;
   min-width: 800px;
   height: 600px;
-  background-color: rgba(30, 30, 30, 0.9);
+  background-color: rgb(58, 157, 216);
 }
 
 .white-panel {
