@@ -4,10 +4,11 @@ import BuyTicket from "@/views/BuyTicket.vue";
 import PaymentTimer from "@/views/PaymentTimer.vue";
 import OrderList from '@/views/order-list/index.vue'
 import PaySuccess from "@/views/PaySuccess.vue";
+import Login2 from "@/views/Login2.vue";
 
 
 const routes = [
-    { path: '/login', component: Login },
+    { path: '/login', component: Login2 },
     {
         path: '/',
         redirect: '/login' // 添加默认重定向

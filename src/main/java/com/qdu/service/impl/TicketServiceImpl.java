@@ -37,9 +37,10 @@ public class TicketServiceImpl implements ITicketService {
     public List<TicketListDTO> listTicketQuery(String fromCityCode, String toCityCode, LocalDate departureDate) {
         String key = "ticket:query:" + fromCityCode + ":" + toCityCode + ":" + departureDate;
         List<TicketListDTO> dtos = (List<TicketListDTO>) redisTemplate.opsForValue().get(key);
+        System.out.println("redis查询车票信息列表");
         if (dtos == null) {
             dtos = new ArrayList<>();
-
+            System.out.println("redis失效，查询车票信息列表");
             //查询两城市之间的火车信息，因为一个城市可能有多个车站，一条火车路线中，可能包含一个城市的多个站点，
             // 比如北京南-上海虹桥，北京西-上海虹桥，所以根据两个城市名称可能会查出多条站到站的路线信息
             List<StationToStationRouteDTO> routes = trainService.findTrainsByCityCodes(fromCityCode, toCityCode, departureDate);

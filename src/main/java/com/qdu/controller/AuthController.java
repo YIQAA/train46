@@ -59,7 +59,7 @@ public class AuthController {
 
             // 2. 获取用户详细信息
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            System.out.println("111111"+userDetails);
+            System.out.println("用户详细信息"+userDetails);
 
 
             // 3. 生成 Token

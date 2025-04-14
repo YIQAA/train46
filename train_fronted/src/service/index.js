@@ -4,10 +4,10 @@ import http from './axios'
 const fetchLogin = async (body) => {
   const { data } = await http({
     method: 'POST',
-    url: '/api/user-service/v1/login',
+    url: '/api/auth/login',
     data: body
   })
-  http.defaults.headers.common['Authorization'] = data.data?.accessToken
+  //http.defaults.headers.common['Authorization'] = data?.accessToken
   return data
 }
 // 注册
