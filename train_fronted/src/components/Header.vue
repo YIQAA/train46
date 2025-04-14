@@ -38,8 +38,8 @@
           <CommentOutlined /> 智能客服
         </router-link>
       </a-menu-item>
-      <a-menu-item key="/admin">
-        <router-link to="/admin">
+      <a-menu-item key="/adminPage">
+        <router-link to="/adminPage">
           <desktop-outlined/> &nbsp; 关于控台管理
         </router-link>
       </a-menu-item>

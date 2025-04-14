@@ -1,22 +1,27 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Login from '../views/Login.vue';
+import Login1 from '../views/Login1.vue';
 import BuyTicket from "@/views/BuyTicket.vue";
 import PaymentTimer from "@/views/PaymentTimer.vue";
-import OrderList from '@/views/order-list/index.vue'
+import OrderList from '@/views/OrderList.vue'
 import PaySuccess from "@/views/PaySuccess.vue";
-import Login2 from "@/views/Login2.vue";
+import Login from "@/views/Login.vue";
+import AdminPage from "@/components/adminMain.vue";
+import userMain from "@/components/userMain.vue";
+
 
 
 const routes = [
-    { path: '/login', component: Login2 },
+    {
+        path: '/login',
+        component: Login },
     {
         path: '/',
         redirect: '/login' // 添加默认重定向
     },
     {
         path: '/',
-        name: 'main',
-        component: () => import(/* webpackChunkName: "about" */ '../views/main.vue'),
+        name: 'userMain',
+        component:  userMain,
         meta: {
             loginRequired: true
         },
@@ -75,6 +80,36 @@ const routes = [
             meta: { requiresAuth: true }
         }
 
+        ]
+    },
+    {
+        label: '管理员界面',
+        path: '/adminPage',
+        name: 'adminPage',
+        component: AdminPage,
+        icon: 'icon-guanli',
+        meta: { requiresAuth: true },
+        children: [
+            // {
+            //     label: '用户管理',
+            //     path: '/userManagement',
+            //     name: 'userManagement',
+            //     component: () => import( '../views/admin/UserManagement.vue'),
+            //     icon: 'icon-yonghuguanli',
+            //     meta: { requiresAuth: true }
+            // },
+            // {
+            //     label: '车次管理',
+            //     path: '/trainManagement',
+            //     name: 'trainManagement',
+            //     component: () =>import( '../views/admin/TrainManagement.vue'),
+            // },
+            {
+                label: '车次管理',
+                path: '/train/ticketList',
+                name: 'trainManagement',
+                component: () => import( '../views/TicketSearch.vue'),
+            }
         ]
     }
 ];

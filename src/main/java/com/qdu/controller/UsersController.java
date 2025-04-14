@@ -26,7 +26,7 @@ public class UsersController {
 
     private final UsersServiceImpl userService;
 
-    @PostMapping("/api/user-service/register")
+    @PostMapping("/register")
     public Result<UserRegisterRespDTO> register(@RequestBody @Valid UserRegisterReqDTO requestParam) {
         return Results.success(userService.register(requestParam));
     }

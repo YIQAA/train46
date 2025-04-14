@@ -1,7 +1,5 @@
 <template>
   <div class="train-booking">
-
-
     <!-- 特色服务区 -->
     <div class="special-service-section">
       <h2>特色服务</h2>
@@ -79,41 +77,6 @@ const handleTicketBooking = () => {
   // 这里可以添加跳转到车票预订页面的逻辑
 };
 
-// 订单查询点击事件处理
-const handleOrderQuery = () => {
-  console.log('点击了订单查询');
-  // 这里可以添加跳转到订单查询页面的逻辑
-};
-
-// 余票查询点击事件处理
-const handleRemainingTicketQuery = () => {
-  console.log('点击了余票查询');
-  // 这里可以添加跳转到余票查询页面的逻辑
-};
-
-// 订餐服务点击事件处理
-const handleMealBooking = () => {
-  console.log('点击了订餐服务');
-  // 这里可以添加跳转到订餐服务页面的逻辑
-};
-
-// 接送站服务点击事件处理
-const handlePickupAndDropoff = () => {
-  console.log('点击了接送站服务');
-  // 这里可以添加跳转到接送站服务页面的逻辑
-};
-
-// 重点旅客预约点击事件处理
-const handleSpecialPassengerReservation = () => {
-  console.log('点击了重点旅客预约');
-  // 这里可以添加跳转到重点旅客预约页面的逻辑
-};
-
-// 遗失物品查找点击事件处理
-const handleLostItemSearch = () => {
-  console.log('点击了遗失物品查找');
-  // 这里可以添加跳转到遗失物品查找页面的逻辑
-};
 </script>
 
 <style scoped>

@@ -235,14 +235,14 @@ import {
   Button
 } from 'ant-design-vue';
 import {QuestionCircleFilled} from '@ant-design/icons-vue';
-import {fetchTicketList, fetchOrderCancel, fetchRefundTicket} from '@/service';
+import {fetchTicketList, fetchOrderCancel, fetchRefundTicket} from '@/service/index.js';
 import {reactive, watch, h} from 'vue';
 import {
   ID_CARD_TYPE,
   SEAT_CLASS_TYPE_LIST,
   TICKET_TYPE_LIST,
   TICKET_STATUS_LIST
-} from '@/constants';
+} from '@/constants/index.js';
 import Cookie from 'js-cookie';
 import {useRouter} from 'vue-router';
 

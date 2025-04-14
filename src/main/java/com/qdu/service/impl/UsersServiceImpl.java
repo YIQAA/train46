@@ -8,6 +8,7 @@ import com.qdu.mapper.UsersMapper;
 import com.qdu.service.IUsersService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,14 +41,19 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         return baseMapper.getUserNameByUserId(userId);
     }
 
+
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
-    private PasswordEncoder passwordEncoder2;
+    public UsersServiceImpl(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public UserRegisterRespDTO register(UserRegisterReqDTO requestParam) {
         Users user = new Users();
         user.setUserName(requestParam.getUsername());
-        user.setEncryptedPassword(passwordEncoder2.encode(requestParam.getPassword()));
+        user.setEncryptedPassword(passwordEncoder.encode(requestParam.getPassword()));
         user.setRealName(requestParam.getRealName());
         user.setIdCard(requestParam.getIdCard());
         user.setPhone(requestParam.getPhone());
@@ -61,7 +67,6 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         userRegisterRespDTO.setUsername(user.getUserName());
         userRegisterRespDTO.setRealName(user.getRealName());
         userRegisterRespDTO.setPhone(user.getPhone());
-
         return userRegisterRespDTO;
     }
 }

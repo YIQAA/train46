@@ -7,7 +7,7 @@ const fetchLogin = async (body) => {
     url: '/api/auth/login',
     data: body
   })
-  //http.defaults.headers.common['Authorization'] = data?.accessToken
+  //http.defaults.headers.common['Authorization'] = data?.token
   return data
 }
 // 注册
