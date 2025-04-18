@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design-vue/use": "^0.0.1-alpha.10",
     "@ant-design/icons-vue": "^6.1.0",
     "ant-design-vue": "^3.2.20",
     "axios": "^1.8.3",

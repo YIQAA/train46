@@ -1,35 +1,7 @@
 <template>
   <div class="train-booking">
-    <!-- 特色服务区 -->
-    <div class="special-service-section">
-      <h2>特色服务</h2>
-      <a-row gutter="16">
-        <a-col :span="6">
-          <a-card title="订餐服务" @click="handleMealBooking">
-            <img name="ii" src="../assets/train_banner.jpg" alt="订餐服务图片" />
-          </a-card>
-        </a-col>
-        <a-col :span="6">
-          <a-card title="接送站服务" @click="handlePickupAndDropoff">
-            <img src="https://via.placeholder.com/150" alt="接送站服务图片" />
-          </a-card>
-        </a-col>
-        <a-col :span="6">
-          <a-card title="重点旅客预约" @click="handleSpecialPassengerReservation">
-            <img src="https://via.placeholder.com/150" alt="重点旅客预约图片" />
-          </a-card>
-        </a-col>
-        <a-col :span="6">
-          <a-card title="遗失物品查找" @click="handleLostItemSearch">
-            <img src="https://via.placeholder.com/150" alt="遗失物品查找图片" />
-          </a-card>
-        </a-col>
-      </a-row>
-    </div>
-
     <!-- 旅游推荐区 -->
     <div class="travel-recommendation-section">
-      <h2>旅游推荐</h2>
       <a-carousel autoplay>
         <a-carousel-item v-for="(item, index) in travelRecommendations" :key="index">
           <img :src="item.image" alt="旅游推荐图片" />
@@ -38,6 +10,34 @@
         </a-carousel-item>
       </a-carousel>
     </div>
+    <!-- 特色服务区 -->
+    <div class="special-service-section">
+      <h2>特色服务</h2>
+      <a-row gutter="16">
+        <a-col :span="6">
+          <a-card title="订餐服务" @click="handleMealBooking">
+            <img name="ii" src="../assets/04.jpg" alt="订餐服务图片"  />
+          </a-card>
+        </a-col>
+        <a-col :span="6">
+          <a-card title="接送站服务" @click="handlePickupAndDropoff">
+            <img src="../assets/01.jpg" alt="接送站服务图片" />
+          </a-card>
+        </a-col>
+        <a-col :span="6">
+          <a-card title="重点旅客预约" @click="handleSpecialPassengerReservation">
+            <img src="../assets/02.jpg" alt="重点旅客预约图片" />
+          </a-card>
+        </a-col>
+        <a-col :span="6">
+          <a-card title="e卡通" @click="handleLostItemSearch">
+            <img src="../assets/03.jpg" alt="遗失物品查找图片" />
+          </a-card>
+        </a-col>
+      </a-row>
+    </div>
+
+
 
     <!-- 底部信息 -->
     <a-layout-footer>
@@ -60,14 +60,11 @@ import {
 // 模拟旅游推荐数据
 const travelRecommendations = ref([
   {
-    image: '../assets/train_banner.jpg',
-    title: '环西部火车游 - 陇上江南行',
-    description: '体验陇上江南的美丽风光，探索独特的人文风情。'
+    image: new URL('../assets/train_banner.jpg', import.meta.url).href,
+
   },
   {
-    image: '../assets/train_banner.jpg',
-    title: '环西部火车游 - 华夏寻根之旅',
-    description: '追寻华夏文明的根源，感受历史的厚重。'
+    image: new URL('../assets/banner12.jpg', import.meta.url).href,
   }
 ]);
 
@@ -106,5 +103,71 @@ a-layout-header {
 
 a-layout-footer {
   text-align: center;
+}
+
+/* 增加卡片图片样式 */
+.special-service-section .ant-card img {
+  width: 100%;
+  height: 200px; /* 建议设置固定高度保持卡片整齐 */
+  object-fit: cover; /* 保持图片比例并填充容器 */
+  display: block; /* 消除图片底部间隙 */
+}
+
+/* 统一卡片高度 */
+.special-service-section .ant-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 卡片内容区域自适应 */
+.special-service-section .ant-card-body {
+  flex: 1;
+  padding: 16px; /* 可选：调整内边距 */
+}
+/* 调整卡片高度和图片样式 */
+.special-service-section .ant-card {
+  min-height: 380px; /* 增加卡片最小高度 */
+  display: flex;
+  flex-direction: column;
+}
+
+.special-service-section .ant-card img {
+  width: 100%;
+  height: 280px; /* 增加图片显示高度 */
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease; /* 添加悬停动效 */
+}
+
+/* 添加鼠标悬停效果 */
+.special-service-section .ant-card:hover img {
+  transform: scale(1.05);
+}
+
+/* 调整卡片标题样式 */
+.special-service-section .ant-card-head-title {
+  white-space: normal; /* 允许标题换行 */
+  padding: 12px 0;
+}
+
+/* 调整卡片内容区域 */
+.special-service-section .ant-card-body {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* 调整旅游推荐轮播图高度 */
+.travel-recommendation-section .ant-carousel {
+  height: 400px;
+}
+
+.travel-recommendation-section .ant-carousel img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
 }
 </style>

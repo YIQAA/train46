@@ -350,8 +350,8 @@ const handleSubmitBuyTicket = () => {
     passengers,
     chooseSeats: toRaw(state.currSeatListCode),
     isChooseSeat: state.isChooseSeat,
-    departureStation: state.currTrain?.departureStation,
-    arrivalStation: state.currTrain?.arrivalStation
+    departureStation: query?.departureStation,
+    arrivalStation: query?.arrivalStation
   }
   console.log('params:::', params)
   console.log('datasourse:::', state.Passengers)

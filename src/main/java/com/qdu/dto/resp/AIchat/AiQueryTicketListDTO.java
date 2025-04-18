@@ -40,4 +40,8 @@ public class AiQueryTicketListDTO {
      */
     private String ticketAvailPrice;
 
+    /**
+     * 操作
+     */
+    private String operation;
 }

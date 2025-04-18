@@ -248,7 +248,7 @@ import {useRouter} from 'vue-router';
 
 // 响应式状态对象
 const state = reactive({
-  activeKey: 0, // 当前激活的标签页
+  activeKey: 1, // 当前激活的标签页
   dataSource: [], // 表格数据源
   current: 1, // 当前页码
   size: '10', // 每页显示数量

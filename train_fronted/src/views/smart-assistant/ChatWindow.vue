@@ -29,7 +29,6 @@
 
                 <!-- 表格类型 -->
                 <div v-if="message.type === 'table'" class="content-table">
-
                   <div class="table-header">{{ message.content.text }}</div>
                   <br>
                   <a-table
@@ -37,7 +36,20 @@
                       :data-source="message.content.data"
                       :pagination="false"
                       size="small"
-                  />
+                  >
+                    <template #bodyCell="{ column, record }">
+                      <template v-if="column.dataIndex === 'operation'">
+                        <a-button
+                            type="link"
+                            size="small"
+                            @click="handleOperationClick(record.operation)"
+                            v-if="record.operation"
+                        >
+                          立即购票
+                        </a-button>
+                      </template>
+                    </template>
+                  </a-table>
                 </div>
 
                 <!-- 按钮组类型 -->
@@ -119,19 +131,26 @@ const getBotResponse = async (input, tempId) => {
   try {
     const response = await fetchMessageByAI({ message: input });
     const index = messages.value.findIndex(msg => msg.id === tempId);
-    console.log('获取AI回复:', response);
-    // 转换表格数据结构
+
+    // 增强表格处理逻辑
     const processedContent = response.type === 'table' ? {
       text: response.content.text,
       columns: response.content.columns.map((title, index) => ({
         title,
-        dataIndex: `${index}`, // 用索引作为数据字段名
-        key: `${index}`
+        dataIndex: `${index}`,
+        key: `${index}`,
+        // 添加操作列特殊处理
+        ...(title === '操作' ? {
+          dataIndex: 'operation',
+          key: 'operation',
+          width: 120
+        } : {})
       })),
       data: response.content.data.map((row, i) => {
         const record = { key: i };
         row.forEach((value, index) => {
-          record[`${index}`] = value;
+          // 将"操作"列数据映射到operation字段
+          record[response.content.columns[index] === '操作' ? 'operation' : `${index}`] = value;
         });
         return record;
       })
@@ -167,6 +186,11 @@ const getBotResponse = async (input, tempId) => {
       messages.value.push(errorMessage);
     }
   }
+};
+
+// 添加操作点击处理
+const handleOperationClick = (url) => {
+  window.open(url, '_blank', 'noopener,noreferrer');
 };
 
 // 发送消息

@@ -236,13 +236,13 @@ const handleLogin = async () => {
       localStorage.setItem('token', res.token);
       localStorage.setItem('userName', res.username);
       localStorage.setItem('userId', res.userId);
-      localStorage.setItem('userRole', res.role);
+      localStorage.setItem('userRole', res.userRole);
       localStorage.setItem('realName', res.realName);
 
       console.log('登录成功，用户信息已存储到本地存储。');
       console.log('用户信息:', res.realName);
       console.log('token:', res.token);
-      console.log('用户角色:', res.role);
+      console.log('用户角色:', res.userRole);
       console.log('用户名:', res.username);
       console.log('用户ID:', res.userId);
 
@@ -251,7 +251,11 @@ const handleLogin = async () => {
       // Cookies.set('userId', res.data?.userId)
       // Cookies.set('username', res.data?.username)
       // 跳转到票务搜索页面
-      router.push('/Welcome');
+      if (res.userRole === 'admin') {
+        router.push('/adminPage');
+      } else if (res.userRole === 'user') {
+        router.push('/Welcome');
+      }
     }
 
   } catch (error) {

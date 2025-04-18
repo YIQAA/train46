@@ -18,9 +18,9 @@
           <coffee-outlined></coffee-outlined>&nbsp; 欢迎
         </router-link>
       </a-menu-item>
-      <a-menu-item key="/passenger">
-        <router-link to="">
-          <user-outlined/> &nbsp; 乘车人管理
+      <a-menu-item key="/userDetail">
+        <router-link to="/userDetail">
+          <user-outlined/> &nbsp; 个人中心
         </router-link>
       </a-menu-item>
       <a-menu-item key="/ticketSearch">
@@ -38,7 +38,7 @@
           <CommentOutlined /> 智能客服
         </router-link>
       </a-menu-item>
-      <a-menu-item key="/adminPage">
+      <a-menu-item key="/adminPage" v-if="userRole === 'admin'">
         <router-link to="/adminPage">
           <desktop-outlined/> &nbsp; 关于控台管理
         </router-link>
@@ -47,30 +47,27 @@
   </a-layout-header>
 </template>
 
-<script>
-import {defineComponent, ref, watch} from 'vue';
-import store from "@/store";
-import router from "@/router";
 
+<script setup>
+  import { ref, watch, computed } from 'vue';
+  import store from "@/store";
+  import router from "@/router";
 
-export default defineComponent({
-  name: "header-view",
-  setup() {
-    let member = store.state.member;
-    const userName = localStorage.getItem('realName');
-    const selectedKeys = ref([]);
-    watch(() => router.currentRoute.value.path, (newValue) => {
-      console.log('watch', newValue);
-      selectedKeys.value = [];
-      selectedKeys.value.push(newValue);
-    }, {immediate: true});
-    return {
-      selectedKeys,
-      member,
-      userName
-    };
-  },
-});
+  // 响应式状态
+  const member = computed(() => store.state.member);
+  const userName = localStorage.getItem('realName');
+  const userRole = localStorage.getItem('userRole');
+  const selectedKeys = ref([]);
+
+  // 路由监听逻辑
+  watch(
+  () => router.currentRoute.value.path,
+  (newValue) => {
+  console.log('watch', newValue);
+  selectedKeys.value = [newValue];
+},
+  { immediate: true }
+  );
 </script>
 
 <style scoped>

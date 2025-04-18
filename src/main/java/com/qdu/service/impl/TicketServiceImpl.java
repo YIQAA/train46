@@ -35,6 +35,7 @@ public class TicketServiceImpl implements ITicketService {
 
     //根据出发城市code，到达城市code，日期  查询 车次车票信息列表
     public List<TicketListDTO> listTicketQuery(String fromCityCode, String toCityCode, LocalDate departureDate) {
+
         String key = "ticket:query:" + fromCityCode + ":" + toCityCode + ":" + departureDate;
         List<TicketListDTO> dtos = (List<TicketListDTO>) redisTemplate.opsForValue().get(key);
         System.out.println("redis查询车票信息列表");

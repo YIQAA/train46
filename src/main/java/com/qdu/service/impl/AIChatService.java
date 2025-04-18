@@ -61,6 +61,22 @@ public class AIChatService implements IAIChatService {
                 aiQueryTicket.setTicketAvailPrice("紧张，"+price+"元起");
             }
             aiQueryTicketListDTOS.add(aiQueryTicket);
+            //操作
+            //http://localhost:5173/buyTicket?
+            //  fromCity=北京&
+            //  toCity=上海&
+            //  departureDate=2024-03-20&
+            //  trainNumber=G123&
+            //  trainId=123456&
+            //  departureStation=北京南站&
+            //  arrivalStation=上海虹桥
+            String operation = "http://localhost:5173/buyTicket?fromCity="+fromCityCode+"&toCity="+toCityCode+
+                    "&departureDate="+departureDate+"&trainNumber="+ticket.getTrainNumber()+
+                    "&trainId="+ticket.getTrainId()+"&departureStation="+ticket.getDepartureStation()+
+                    "&arrivalStation="+ticket.getArrivalStation()+"";
+            System.out.println("@@@@@@@@@@@@@@@@操作："+operation);
+            aiQueryTicket.setOperation(operation);
+
         }
 
         return aiQueryTicketListDTOS;

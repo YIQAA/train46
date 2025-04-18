@@ -14,34 +14,51 @@
           @click="handleMenuClick"
       >
         <!-- 首页 -->
-        <a-menu-item key="/dashboard">
+        <a-menu-item key="">
           <template #icon><HomeOutlined /></template>
-          <router-link to="/dashboard">首页</router-link>
+          <router-link to="/userManagement">首页</router-link>
         </a-menu-item>
-
-        <!-- 车次管理（带子菜单） -->
-        <a-sub-menu key="train">
-          <template #icon><CarOutlined /></template>
-          <template #title>车次管理</template>
-          <a-menu-item key="/train/add-station">
-            <router-link to="/train/add-station">添加车站</router-link>
-          </a-menu-item>
-          <a-menu-item key="/train/add-route">
-            <router-link to="/train/add-route">添加路线</router-link>
-          </a-menu-item>
-          <a-menu-item key="/train/add-train">
-            <router-link to="/train/add-train">添加车次</router-link>
-          </a-menu-item>
-          <a-menu-item key="/train/ticketList">
-            <router-link to="/train/ticketList">车次列表</router-link>
-          </a-menu-item>
-        </a-sub-menu>
 
         <!-- 用户管理 -->
-        <a-menu-item key="/user">
+        <a-menu-item key="/userManagement">
           <template #icon><UserOutlined /></template>
-          <router-link to="/user">用户管理</router-link>
+          <router-link to="/userManagement">用户管理</router-link>
         </a-menu-item>
+        <!-- 用户管理 -->
+        <a-menu-item key="/stationManagement">
+          <template #icon><CompassOutlined /></template>
+          <router-link to="/stationManagement">车站管理</router-link>
+        </a-menu-item>
+        <!-- 用户管理 -->
+        <a-menu-item key="/trainManagement">
+          <template #icon><CarOutlined /></template>
+          <router-link to="/trainManagement">车次管理</router-link>
+        </a-menu-item>
+        <!-- 用户管理 -->
+        <a-menu-item key="/orderManagement">
+          <template #icon><MoneyCollectOutlined /></template>
+          <router-link to="/orderManagement">订单管理</router-link>
+        </a-menu-item>
+<!--        &lt;!&ndash; 车次管理（带子菜单） &ndash;&gt;-->
+<!--        <a-sub-menu key="/train">-->
+<!--          <template #icon><CarOutlined /></template>-->
+
+<!--          <template #title>车次管理</template>-->
+<!--          <a-menu-item key="/train/stationList">-->
+<!--            <router-link to="/train/stationList">车站管理</router-link>-->
+<!--          </a-menu-item>-->
+<!--          <a-menu-item key="/trainManagement">-->
+<!--            <router-link to="/trainManagement">车次列表</router-link>-->
+<!--          </a-menu-item>-->
+<!--          <a-menu-item key="/train/add-train">-->
+<!--            <router-link to="/train/add-train">添加车次</router-link>-->
+<!--          </a-menu-item>-->
+<!--          <a-menu-item key="/train/ticketList">-->
+<!--            <router-link to="/train/ticketList">车次列表</router-link>-->
+<!--          </a-menu-item>-->
+<!--        </a-sub-menu>-->
+
+
       </a-menu>
     </a-layout-sider>
 

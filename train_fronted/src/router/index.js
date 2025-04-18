@@ -32,6 +32,14 @@ const routes = [
             component: () => import( '../views/Welcome.vue')
         },
         {
+            label: '个人中心',
+            path: '/userDetail',
+            name: 'userDetail',
+            component: () => import( '../views/UserInfo.vue'),
+            icon: 'icon-shouye',
+            meta: { requiresAuth: false }
+        },
+        {
             label: '车票查询',
             path: '/ticketSearch',
             name: 'ticketSearch',
@@ -90,25 +98,38 @@ const routes = [
         icon: 'icon-guanli',
         meta: { requiresAuth: true },
         children: [
-            // {
-            //     label: '用户管理',
-            //     path: '/userManagement',
-            //     name: 'userManagement',
-            //     component: () => import( '../views/admin/UserManagement.vue'),
-            //     icon: 'icon-yonghuguanli',
-            //     meta: { requiresAuth: true }
-            // },
-            // {
-            //     label: '车次管理',
-            //     path: '/trainManagement',
-            //     name: 'trainManagement',
-            //     component: () =>import( '../views/admin/TrainManagement.vue'),
-            // },
+            {
+                label: '用户管理',
+                path: '/userManagement',
+                name: 'userManagement',
+                component: () => import( '../views/admin/UserManagement.vue'),
+                icon: 'icon-yonghuguanli',
+                meta: { requiresAuth: true }
+            },
+
+            {
+                label: '订单管理',
+                path: '/orderManagement',
+                name: 'orderManagement',
+                component: () => import( '../views/admin/OrderManagement.vue'),
+                icon: 'icon-dingdan',
+                meta: { requiresAuth: true }
+            },
+            {
+                label: '车站管理',
+                path: '/stationManagement',
+                name: 'stationManagement',
+                component: () => import( '../views/admin/stationManagement.vue'),
+                icon: 'icon-yonghuguanli',
+                meta: { requiresAuth: true }
+            },
             {
                 label: '车次管理',
-                path: '/train/ticketList',
+                path: '/trainManagement',
                 name: 'trainManagement',
-                component: () => import( '../views/TicketSearch.vue'),
+                component: () => import( '../views/admin/trainManagement.vue'),
+                icon: 'icon-yonghuguanli',
+                meta: { requiresAuth: true }
             }
         ]
     }

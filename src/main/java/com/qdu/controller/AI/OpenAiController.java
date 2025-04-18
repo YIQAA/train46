@@ -21,9 +21,9 @@ import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException; // JSON解析异常
-import com.fasterxml.jackson.databind.ObjectMapper;         // JSON序列化/反序列化工具
-import com.fasterxml.jackson.core.type.TypeReference;      // 泛型类型引用
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 /**
  * 控制器类，处理与AI聊天相关的请求
  */
