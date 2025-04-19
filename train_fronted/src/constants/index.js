@@ -175,11 +175,11 @@ const REGIN_MAP = [
 ]
 const CHECK_STATUS = [
   {
-    value: 'active',
+    value: "active",
     label: '通过'
   },
   {
-    value: 'inactive',
+    value: "inactive",
     label: '未通过'
   }
 ]

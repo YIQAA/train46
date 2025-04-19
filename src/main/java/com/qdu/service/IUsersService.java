@@ -2,6 +2,7 @@ package com.qdu.service;
 
 import com.qdu.dto.req.user.UserRegisterReqDTO;
 import com.qdu.dto.resp.ticketList.UserPassengerRespDTO;
+import com.qdu.dto.resp.user.UserQueryRespDTO;
 import com.qdu.dto.resp.user.UserRegisterRespDTO;
 import com.qdu.entity.Users;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -28,4 +29,7 @@ public interface IUsersService extends IService<Users> {
 
     //注册
     UserRegisterRespDTO register(UserRegisterReqDTO requestParam);
+
+    //根据用户名查用户信息
+    UserQueryRespDTO queryUserByUsername(String username);
 }

@@ -2,6 +2,7 @@ package com.qdu.service.impl;
 
 import com.qdu.dto.req.user.UserRegisterReqDTO;
 import com.qdu.dto.resp.ticketList.UserPassengerRespDTO;
+import com.qdu.dto.resp.user.UserQueryRespDTO;
 import com.qdu.dto.resp.user.UserRegisterRespDTO;
 import com.qdu.entity.Users;
 import com.qdu.mapper.UsersMapper;
@@ -68,5 +69,20 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         userRegisterRespDTO.setRealName(user.getRealName());
         userRegisterRespDTO.setPhone(user.getPhone());
         return userRegisterRespDTO;
+    }
+
+    @Override
+    public UserQueryRespDTO queryUserByUsername(String username) {
+        Users user = baseMapper.getOneByUsername(username);
+        UserQueryRespDTO userQueryRespDTO = new UserQueryRespDTO();
+        if (user != null) {
+            userQueryRespDTO.setUsername(user.getUserName());
+            userQueryRespDTO.setRealName(user.getRealName());
+            userQueryRespDTO.setIdType(0);
+            userQueryRespDTO.setIdCard(user.getIdCard());
+            userQueryRespDTO.setPhone(user.getPhone());
+           userQueryRespDTO.setStatus(user.getStatus());
+        }
+        return userQueryRespDTO;
     }
 }

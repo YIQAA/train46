@@ -188,6 +188,19 @@ const fechUserInfo = async (params) => {
   })
   return data
 }
+//获取保险列表
+const fetchInsuranceList = async (params) => {
+  const { data } = await http({
+    method: 'GET',
+    url: '/api/insurance-service/insurance/query',
+    params
+  })
+  return data
+}
+
+
+
+
 
 // 乘客删除
 const fetchDeletePassenger = async (body) => {
@@ -271,5 +284,6 @@ export {
   fetchMyTicket,
   fetchRefundTicket,
   fetchMessageByAI,
-  fetchBuyInsurance
+  fetchBuyInsurance,
+  fetchInsuranceList
 }
