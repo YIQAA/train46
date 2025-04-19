@@ -46,28 +46,7 @@ const DISCOUNTS_TYPE = [
   }
 ]
 
-const TRAIN_TAG = [
-  {
-    label: '复',
-    value: '0',
-    color: '#f29c58'
-  },
-  {
-    label: '智',
-    value: '1',
-    color: '#7db08d'
-  },
-  {
-    label: '静',
-    value: '2',
-    color: '#64a0f6'
-  },
-  {
-    label: '铺',
-    value: '3',
-    color: '#5d9bf6'
-  }
-]
+
 
 const TICKET_STATUS_LIST = [
   {
@@ -196,14 +175,32 @@ const REGIN_MAP = [
 ]
 const CHECK_STATUS = [
   {
-    value: 0,
+    value: 'active',
     label: '通过'
   },
   {
-    value: 1,
+    value: 'inactive',
     label: '未通过'
   }
 ]
+const INSURANCE_TYPE= [
+  {
+    value: 1,
+    label: '出行无忧保'
+  },
+  {
+    value: 2,
+    label: '旅程预定取消险'
+  },
+  {
+    value: 3,
+    label: '国内旅行险'
+  },
+  {
+    value: 4,
+    label: '空铁联运险'
+  }
+ ]
 export {
   TICKET_TYPE_LIST,
   SEAT_NAME_MAP,
@@ -215,5 +212,6 @@ export {
   DISCOUNTS_TYPE,
   REGIN_MAP,
   CHECK_STATUS,
-  TRAIN_TAG
+  INSURANCE_TYPE
+
 }

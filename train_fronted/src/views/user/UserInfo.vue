@@ -50,35 +50,9 @@
     <Divider dashed></Divider>
     <div class="title-wrapper">
       <TypographyTitle :level="5">附加信息</TypographyTitle>
-      <Button
-          @click="handleOtherEditTypeChange"
-          v-if="state.otherEditType === 'view'"
-      >编辑</Button
-      >
-      <Button @click="handleOtherSubmit" v-else>保存</Button>
     </div>
-    <div v-if="state.otherEditType === 'view'">
-      <Row class="info-wrapper">
-        <Col :span="8" :style="{ textAlign: 'end' }">
-          <label class="info-label info-require">优惠(待)类</label>
-        </Col>
-        <Col :span="4" :style="{ textAlign: 'start' }">
-          <span class="info-value">{{
-              DISCOUNTS_TYPE.find((item) => item.value === state.userType)?.label
-            }}</span></Col
-        >
-      </Row>
-    </div>
-    <div v-else>
-      <Form :label-col="{ span: 8 }" :wrapper-col="{ span: 4 }">
-        <FormItem label="优惠(待)类" required>
-          <Select v-model:value="state.userType">
-            <SelectOption v-for="item in DISCOUNTS_TYPE" :value="item.value">{{
-                item.label
-              }}</SelectOption>
-          </Select>
-        </FormItem>
-      </Form>
+    <div>
+
     </div>
   </Card>
 </template>
@@ -100,22 +74,16 @@ import {
 } from 'ant-design-vue'
 import { reactive, onMounted } from 'vue'
 import jsCookie from 'js-cookie'
-import { fechUserInfo, fetchUserUpdate } from '@/service'
-import { REGIN_MAP, CHECK_STATUS, DISCOUNTS_TYPE } from '@/constants'
+import { fechUserInfo, fetchUserUpdate } from '@/service/index.js'
+import { REGIN_MAP, CHECK_STATUS, DISCOUNTS_TYPE } from '@/constants/index.js'
 const useForm = Form.useForm
 
 const state = reactive({
   contactEditType: 'view',
   otherEditType: 'view',
   userInfoMap: [
-    { label: '用户名', value: '--', key: 'username' },
+    { label: '登录账号（手机号）', value: '--', key: 'username' },
     { label: '姓名', value: '--', key: 'realName' },
-    {
-      label: '国家/地区',
-      value: '--',
-      key: 'region',
-      render: (value) => REGIN_MAP.find((item) => item.value === value)?.label
-    },
     {
       label: '证件类型',
       value: '--',
@@ -134,15 +102,14 @@ const state = reactive({
     }
   ],
   editUserInfoMap: [
-    { label: '手机号', value: undefined, name: 'phone', require: true },
+    { label: '联系电话', value: undefined, name: 'phone', require: true },
     { label: '邮箱', value: undefined, name: 'mail' },
     { label: '地址', value: undefined, name: 'address' },
     { label: '邮编', value: undefined, name: 'postCode' }
-  ],
-  userType: undefined
+  ]
 })
 
-const username = jsCookie.get('username')
+const username = localStorage.getItem('userName')
 
 const { validate } = useForm(
     state.editUserInfoMap,

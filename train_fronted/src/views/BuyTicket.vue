@@ -524,10 +524,7 @@ const handleSubmitBuyTicket = () => {
       </Card>
       <div>
         <span>提交订单表示已阅读并同意</span>
-        <span
-          ><a href="">《国铁集团铁路旅客运输规程》</a
-          ><a href="">《服务条款》</a></span
-        >
+        <span><a href="">《国铁集团铁路旅客运输规程》</a><a href="">《服务条款》</a></span>
       </div>
       <div :style="{ width: '100%', textAlign: 'center' }">
         <Space size="large">

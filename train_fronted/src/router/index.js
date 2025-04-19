@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Login1 from '../views/Login1.vue';
 import BuyTicket from "@/views/BuyTicket.vue";
 import PaymentTimer from "@/views/PaymentTimer.vue";
 import OrderList from '@/views/OrderList.vue'
@@ -35,7 +34,7 @@ const routes = [
             label: '个人中心',
             path: '/userDetail',
             name: 'userDetail',
-            component: () => import( '../views/UserInfo.vue'),
+            component: () => import( '../views/user/UserInfo.vue'),
             icon: 'icon-shouye',
             meta: { requiresAuth: false }
         },
@@ -86,7 +85,16 @@ const routes = [
             component: PaySuccess,
             icon: 'icon-zhifubao0',
             meta: { requiresAuth: true }
-        }
+        },
+        //保险
+        {
+            label: '保险',
+            path: '/insurance',
+            name: 'insurance',
+            component: () => import( '../views/user/Insurance.vue'),
+            icon: 'icon-baoxian',
+            meta: { requiresAuth: true }
+        },
 
         ]
     },

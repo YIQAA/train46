@@ -122,6 +122,16 @@ const fetchBuyTicket = async (body) => {
   return data
 }
 
+// 购买保险************
+const fetchBuyInsurance = async (body) => {
+  const { data } = await http({
+    method: 'POST',
+    url: '/api/insurance-service/insurance/create',
+    data: body
+  })
+
+  return data
+}
 // 乘客查询
 export const fetchUserPassenger = async (params) => {
   const { data } = await http({
@@ -260,5 +270,6 @@ export {
   fetchUserUpdate,
   fetchMyTicket,
   fetchRefundTicket,
-  fetchMessageByAI
+  fetchMessageByAI,
+  fetchBuyInsurance
 }

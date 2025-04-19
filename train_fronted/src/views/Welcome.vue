@@ -25,7 +25,7 @@
           </a-card>
         </a-col>
         <a-col :span="6">
-          <a-card title="重点旅客预约" @click="handleSpecialPassengerReservation">
+          <a-card title="保险服务" @click="handleInsurance">
             <img src="../assets/02.jpg" alt="重点旅客预约图片" />
           </a-card>
         </a-col>
@@ -56,6 +56,7 @@ import {
   Col,
   Carousel
 } from 'ant-design-vue';
+import router from "@/router/index.js";
 
 // 模拟旅游推荐数据
 const travelRecommendations = ref([
@@ -72,6 +73,12 @@ const travelRecommendations = ref([
 const handleTicketBooking = () => {
   console.log('点击了车票预订');
   // 这里可以添加跳转到车票预订页面的逻辑
+};
+//点击保险
+const handleInsurance = () => {
+  router.push({ path: '/insurance' });
+  console.log('点击了保险');
+  // 这里可以添加跳转到保险页面的逻辑
 };
 
 </script>

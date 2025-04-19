@@ -372,16 +372,11 @@ const totalAmount = computed(() => {
 
 // 支付方法，接收支付渠道作为参数
 const handlePay = (channel) => {
-  // 检查支付渠道是否不为 0
   if (channel !== 0) {
-    // 如果不为 0，提示用户该支付方式暂未对接
     return message.error('该支付方式暂未对接，请稍候...')
   }
-  // 标记为已发起支付请求
   state.isInitiatePayment = true
-  // 关闭支付选择模态框
   state.open = false
-  // 打开支付中提示模态框
   state.isPayingOpen = true
 
 
