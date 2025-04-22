@@ -32,4 +32,6 @@ public interface OrdersMapper extends BaseMapper<Orders> {
 
     // 查询订单状态
     Integer getOrderStatusByOrderSn(String orderSn);
+
+    List<String> selectAllOrderSn(Object o);
 }

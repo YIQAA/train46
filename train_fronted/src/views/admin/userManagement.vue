@@ -55,10 +55,14 @@ const columns = [
     key: 'phone',
   },
   {
-    title: '是否冻结',
-    dataIndex: 'frozen',
-    key: 'frozen',
-    render: (text) => (text ? '是' : '否'),
+    title: '订单数',
+    dataIndex: 'orderAmount',
+    key: 'orderAmount'
+  },
+  {
+    title: '状态',
+    dataIndex: 'status',
+    key: 'status'
   },
   {
     title: '操作',

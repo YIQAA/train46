@@ -1,17 +1,13 @@
 package com.qdu.controller;
 
-import com.qdu.dto.req.RefundTicketReqDTO;
 import com.qdu.dto.req.TicketPageQueryReqDTO;
-import com.qdu.dto.resp.RefundTicketRespDTO;
 import com.qdu.dto.resp.ticketList.CityQueryRespDTO;
 import com.qdu.dto.resp.ticketList.TicketPageQueryRespDTO;
 import com.qdu.dto.resp.ticketList.TrainStationQueryRespDTO;
 import com.qdu.mapper.StationMapper;
 import com.qdu.service.impl.StationsServiceImpl;
 import com.qdu.service.impl.TicketServiceImpl;
-import kotlin.Result;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

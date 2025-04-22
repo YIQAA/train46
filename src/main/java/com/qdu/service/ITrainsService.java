@@ -1,6 +1,7 @@
 package com.qdu.service;
 
 import com.qdu.dto.domain.StationToStationRouteDTO;
+import com.qdu.dto.resp.admin.TrainListRespDTO;
 import com.qdu.entity.Train;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -30,5 +31,7 @@ public interface ITrainsService extends IService<Train> {
 
     //根据trainId查询出发日期
     LocalDate findDepartureDateByTrainId(Integer trainId);
+
+    List<TrainListRespDTO> listTrainStationQuery();
 
 }

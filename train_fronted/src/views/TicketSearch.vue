@@ -151,30 +151,27 @@ const seatTagAll = ref(false)         // 座位类型全选
 const columns = [
   {
     /* 车次信息列 */
-    title: '车次', // 列标题显示文本
-    dataIndex: 'trainNumber', // 对应数据源的字段名
+    title: '车次',
+    dataIndex: 'trainNumber',
     slots: {
-      // customRender - 指定单元格内容渲染的插槽名称
       customRender: 'trainNumber'
     },
-    key: 'trainNumber', // 唯一标识列的key（必填）
-    width: 90, // 列宽度（像素）
-    align: 'center', // 内容对齐方式
-    // ellipsis: true, // 超出宽度显示省略号（注释状态）
-    resizable: false // 禁止调整列宽
+    key: 'trainNumber',
+    width: 90,
+    align: 'center',
+    resizable: false
   },
 
   /* 车站信息列（复合列） */
   {
-    key: 'station', // 唯一标识
+    key: 'station',
     slots: {
-      // 双自定义插槽配置：
-      title: 'customStaionTitle', // 列标题使用自定义插槽
-      customRender: 'station' // 单元格内容使用自定义插槽
+      title: 'customStaionTitle',
+      customRender: 'station'
     },
     width: 100,
-    ellipsis: true, // 启用文本溢出省略
-    align: 'left' // 左对齐
+    ellipsis: true,
+    align: 'left'
   },
 
   {

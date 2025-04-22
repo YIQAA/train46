@@ -4,23 +4,55 @@
     <h1>车次列表管理</h1>
     <!-- 筛选条件 -->
     <a-form layout="inline">
-      <a-form-item label="状态">
-        <a-select v-model:value="filterState.status" style="width: 120px">
-          <a-select-option value="">全部</a-select-option>
-          <a-select-option value="正常">正常</a-select-option>
-          <a-select-option value="停运">停运</a-select-option>
-        </a-select>
-      </a-form-item>
-      <a-form-item>
-        <a-button type="primary" @click="handleFilter">筛选</a-button>
-      </a-form-item>
       <a-form-item>
         <a-button type="primary" @click="showCreateModal">新增车次</a-button>
       </a-form-item>
     </a-form>
-
+    <br>
     <!-- 车次列表表格 -->
-    <a-table :columns="columns" :data-source="trains" :loading="loading">
+    <a-table :columns="columns"
+             :data-source="state.dataSource"
+             :pagination="false"
+             :loading="state.loading"
+             :bordered="true">
+
+      <template #customStaionTitle>
+        <div>出发站</div>
+        <div>到达站</div>
+      </template>
+      <template #station="{  record }">
+        <div>
+              <span
+                  :style="{
+                  display: 'inline-block',
+                  padding: '2px 4px',
+                  backgroundColor: '#cca567' ,
+                  color: '#fff',
+                  borderRadius: '4px',
+                  fontSize: '10px',
+                  fontWeight: 'bolder',
+                  marginRight: '2px'
+                }"
+              >{{ '始' }}</span
+              >{{ record.trainStartStation }}
+        </div>
+        <div>
+              <span
+                  :style="{
+                  display: 'inline-block',
+                  padding: '2px 4px',
+                  backgroundColor: '#6da77f' ,
+                  color: '#fff',
+                  borderRadius: '4px',
+                  fontSize: '10px',
+                  fontWeight: 'bolder',
+                  marginRight: '2px'
+                }"
+              >{{ '终' }}</span
+              >{{ record.trainEndStation }}
+        </div>
+      </template>
+
       <template #action="{ record }">
         <a-button type="link" @click="showEditModal(record)">编辑</a-button>
         <a-button type="link" @click="handleDelete(record.id)">删除</a-button>
@@ -70,7 +102,8 @@
 <script setup>
 import {ref, reactive, onMounted} from 'vue';
 import axios from 'axios';
-
+import {fetchAdminTicketList, fetchTrainList} from '@/service/index.js';
+import {message, Table} from "ant-design-vue";
 // 响应式状态
 const loading = ref(false);
 const trains = ref([]);
@@ -92,10 +125,82 @@ const formRules = reactive({
 
 // 表格列配置
 const columns = [
-  {title: 'ID', dataIndex: 'id', key: 'id'},
-  {title: '车次编号', dataIndex: 'trainNumber', key: 'trainNumber'},
-  {title: '状态', dataIndex: 'status', key: 'status'},
-  {title: '操作', key: 'action', slots: {customRender: 'action'}},
+  {
+    title: '车次编号',
+    dataIndex: 'trainNumber',
+    key: 'trainNumber',
+    customCell: (record) => ({rowSpan: record?.rowSpan}),
+    align: 'center'
+  },
+  {
+    title: '车次类型',
+    dataIndex: 'trainType',
+    key: 'trainType',
+    customCell: (record) => ({rowSpan: record?.rowSpan})
+  },
+  /* 车站信息列（复合列） */
+  {
+    key: 'station',
+    slots: {
+      title: 'customStaionTitle',
+      customRender: 'station'
+    },
+    customCell: (record) => ({rowSpan: record?.rowSpan}),
+    width: 100,
+    ellipsis: true,
+    align: 'left'
+  },
+  {
+    title: '总时间',
+    dataIndex: 'trainTotalTime',
+    key: 'trainTotalTime',
+    customCell: (record) => ({rowSpan: record?.rowSpan}),
+    width: 120,
+    ellipsis: true,
+    resizable: false,
+    align: 'center'
+  },
+  {
+    title: '总里程',
+    dataIndex: 'trainDistance',
+    key: 'trainDistance',
+    customCell: (record) => ({rowSpan: record?.rowSpan}),
+    width: 120,
+    ellipsis: true,
+    resizable: false,
+    align: 'center'
+  },
+  {
+    title: '站序',
+    dataIndex: 'sequence',
+    key: 'sequence'
+  },
+  {
+    title: '站名',
+    dataIndex: 'stationName',
+    key: 'departureStation'
+  },
+  {
+    title: '到站时间',
+    dataIndex: 'arrivalTime',
+    key: 'arrivalTime'
+  },
+  {
+    title: '出发时间',
+    dataIndex: 'departureTime',
+    key: 'departureTime'
+  },
+  {
+    title: '停留时间',
+    dataIndex: 'stopoverTime',
+    key: 'stopoverTime'
+  },
+  {
+    title: '操作',
+    key: 'action',
+    slots: {customRender: 'action'},
+    customCell: (record) => ({rowSpan: record?.rowSpan})
+  },
 ];
 
 // 生命周期
@@ -103,17 +208,48 @@ onMounted(() => {
   getTrains();
 });
 
-// 方法封装
-const getTrains = async (status = '') => {
-  loading.value = true;
-  try {
-    const response = await axios.get('/api/trains', {params: {status}});
-    trains.value = response.data;
-  } catch (error) {
-    console.error('获取车次列表失败', error);
-  } finally {
-    loading.value = false;
+const state = reactive({
+  dataSource: [],
+  data: [],
+  loading: false,
+  pagination: {
+    current: 1,
+    pageSize: 10,
+    total: 0,
+    showSizeChanger: true,
+    showQuickJumper: true,
+    showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
   }
+});
+
+// 方法封装
+const getTrains =  () => {
+  loading.value = true;
+  fetchTrainList()
+  .then((res) => {
+    console.log('订单返回信息');
+    console.log(res);
+    let dataSource = [];
+    res.map((info) => {
+      console.log('当前处理的记录:', info);
+      info.trainStationQueryRespDTOList?.map((item, index) => {
+        dataSource.push({
+          ...info,
+          ...item,
+          rowSpan: index === 0 ? info.trainStationQueryRespDTOList.length : 0
+        });
+      });
+    });
+    console.log('处理后的数据源:', dataSource);
+    state.dataSource = dataSource;
+    state.data = res;
+    state.loading = false;
+  })
+  .catch((err) => {
+    console.error('获取车次列表失败', err);
+    message.error('获取车次列表失败，请稍后重试');
+    state.loading = false;
+  });
 };
 
 const handleFilter = () => getTrains(filterState.status);

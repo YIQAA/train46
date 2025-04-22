@@ -9,17 +9,14 @@ import com.qdu.dto.req.RefundTicketReqDTO;
 import com.qdu.dto.req.order.TicketOrderCreateReqDTO;
 import com.qdu.dto.req.order.TicketOrderItemCreateReqDTO;
 import com.qdu.dto.req.order.TicketOrderPageQueryReqDTO;
-import com.qdu.dto.resp.RefundTicketRespDTO;
+import com.qdu.dto.resp.user.RefundTicketRespDTO;
 import com.qdu.dto.resp.order.TicketOrderDetailRespDTO;
 import com.qdu.dto.resp.order.TicketOrderPassengerDetailRespDTO;
 import com.qdu.entity.OrderPassengers;
 import com.qdu.entity.Orders;
 import com.qdu.entity.Seat;
 import com.qdu.entity.Station;
-import com.qdu.mapper.OrderPassengersMapper;
-import com.qdu.mapper.OrdersMapper;
-import com.qdu.mapper.SeatMapper;
-import com.qdu.mapper.StationMapper;
+import com.qdu.mapper.*;
 import com.qdu.service.IOrdersService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +53,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final OrderPassengersMapper orderPassengersMapper;
 
     private final RedisTemplate<String, Object> redisTemplate;
-
+    private final UsersMapper usersMapper;
 
 
     // 创建订单
@@ -219,6 +216,11 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return true;
     }
 
+    /**
+     * 退票
+     * @param requestParam
+     * @return
+     */
     @Transactional
     public RefundTicketRespDTO commonTicketRefund(RefundTicketReqDTO requestParam) {
         Orders orders = ordersMapper.selectOne(new QueryWrapper<Orders>().eq("order_number", requestParam.getOrderSn()));
@@ -297,6 +299,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         TicketOrderDetailRespDTO ticketOrderDetailRespDTO = new TicketOrderDetailRespDTO();
 
         ticketOrderDetailRespDTO.setOrderSn(orders.getOrderNumber());
+        ticketOrderDetailRespDTO.setUserName(usersMapper.getUserNameByUserId(orders.getUserId()));
         ticketOrderDetailRespDTO.setTrainId(orders.getTrainId());
         ticketOrderDetailRespDTO.setDepartureStation(stationsService.getStationNameById(orders.getStartStationId()));
         ticketOrderDetailRespDTO.setArrivalStation(stationsService.getStationNameById(orders.getEndStationId()));

@@ -10,12 +10,11 @@
         :columns="columns"
         :data-source="stations"
         :loading="loading"
-        :rowKey="record => record.id"
+        :rowKey="record => record.stationId"
     >
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
-          <a-button type="link" @click="showEditModal(record)">编辑</a-button>
-          <a-button type="link" danger @click="handleDelete(record.id)">删除</a-button>
+          <a-button type="link" danger @click="handleDelete(record.stationId)">删除</a-button>
         </template>
       </template>
     </a-table>
@@ -34,33 +33,26 @@
       >
         <a-form-item
             label="车站名称"
-            name="name"
+            stationName="stationName"
             :rules="[{ required: true, message: '请输入车站名称' }]"
         >
-          <a-input v-model:value="createFormState.name" />
+          <a-input v-model:value="createFormState.stationName" />
         </a-form-item>
-      </a-form>
-    </a-modal>
-
-    <!-- 编辑车站模态框 -->
-    <a-modal
-        v-model:visible="editModalVisible"
-        title="编辑车站"
-        @ok="handleEdit"
-        @cancel="handleCancelEdit"
-    >
-      <a-form
-          :model="editFormState"
-          :label-col="{ span: 6 }"
-          :wrapper-col="{ span: 18 }"
-      >
         <a-form-item
-            label="车站名称"
-            name="name"
-            :rules="[{ required: true, message: '请输入车站名称' }]"
+            label="城市名称"
+            stationName="cityName"
+            :rules="[{ required: true, message: '请输入城市名称' }]"
         >
-          <a-input v-model:value="editFormState.name" />
+          <a-input v-model:value="createFormState.cityName" />
         </a-form-item>
+        <a-form-item
+            label="城市编码"
+            stationName="cityCode"
+            :rules="[{ required: true, message: '请输入城市编码' }]"
+        >
+          <a-input v-model:value="createFormState.cityCode" />
+        </a-form-item>
+
       </a-form>
     </a-modal>
   </div>
@@ -70,34 +62,32 @@
 import { ref, reactive, onMounted } from 'vue';
 import axios from 'axios';
 import { message } from 'ant-design-vue';
-
+import {fetchStationList,fetchCreateStation} from '@/service/index.js';
 // 加载状态
 const loading = ref(false);
 const stations = ref([]);
 
 // 模态框控制
 const createModalVisible = ref(false);
-const editModalVisible = ref(false);
 
 // 表单状态
-const createFormState = reactive({ name: '' });
-const editFormState = reactive({
-  id: null,
-  name: '',
-  originalData: null // 保存原始数据用于取消时恢复
+const createFormState = reactive({
+  stationName: '' ,
+  cityName: '',
+  cityCode: ''
 });
 
 // 表格列配置
 const columns = [
   {
-    title: 'ID',
-    dataIndex: 'id',
-    key: 'id',
+    title: 'stationId',
+    dataIndex: 'stationId',
+    key: 'stationId',
   },
   {
     title: '车站名称',
-    dataIndex: 'name',
-    key: 'name',
+    dataIndex: 'stationName',
+    key: 'stationName',
   },
   {
     title: '所属城市',
@@ -120,11 +110,12 @@ const columns = [
 const getStations = async () => {
   try {
     loading.value = true;
-    const response = await axios.get('/api/stations');
-    stations.value = response.data;
-  } catch (error) {
-    message.error('获取车站列表失败');
-    console.error(error);
+    fetchStationList().then(response => {
+      stations.value = response;
+    }).catch(error => {
+      message.error('获取车站列表失败');
+      console.error(error);
+    });
   } finally {
     loading.value = false;
   }
@@ -132,21 +123,23 @@ const getStations = async () => {
 
 // 新增车站相关逻辑
 const showCreateModal = () => {
-  createFormState.name = '';
+  createFormState.stationName = '';
+  createFormState.cityName = '';
+  createFormState.cityCode = '';
   createModalVisible.value = true;
 };
 
 const handleCreate = async () => {
   try {
-    const response = await axios.post('/api/stations', {
-      name: createFormState.name
-    });
-
-    if (response.status === 201) {
+    fetchCreateStation({
+      stationName: createFormState.stationName,
+      cityName: createFormState.cityName,
+      cityCode: createFormState.cityCode}
+    ).then(response => {
       message.success('创建成功');
-      await getStations();
       createModalVisible.value = false;
-    }
+    });
+    await getStations();
   } catch (error) {
     message.error('创建车站失败');
     console.error(error);
@@ -157,43 +150,12 @@ const handleCancelCreate = () => {
   createModalVisible.value = false;
 };
 
-// 编辑车站相关逻辑
-const showEditModal = (record) => {
-  editFormState.id = record.id;
-  editFormState.name = record.name;
-  editFormState.originalData = { ...record }; // 保存原始数据
-  editModalVisible.value = true;
-};
 
-const handleEdit = async () => {
-  try {
-    const response = await axios.put(`/api/stations/${editFormState.id}`, {
-      name: editFormState.name
-    });
-
-    if (response.status === 200) {
-      message.success('更新成功');
-      await getStations();
-      editModalVisible.value = false;
-    }
-  } catch (error) {
-    message.error('更新车站失败');
-    console.error(error);
-  }
-};
-
-const handleCancelEdit = () => {
-  // 恢复原始数据
-  if (editFormState.originalData) {
-    editFormState.name = editFormState.originalData.name;
-  }
-  editModalVisible.value = false;
-};
 
 // 删除车站
-const handleDelete = async (id) => {
+const handleDelete = async (stationId) => {
   try {
-    const response = await axios.delete(`/api/stations/${id}`);
+    const response = await axios.delete(`/api/stations/${stationId}`);
     if (response.status === 200) {
       message.success('删除成功');
       await getStations();

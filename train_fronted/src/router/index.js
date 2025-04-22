@@ -138,7 +138,15 @@ const routes = [
                 component: () => import( '../views/admin/trainManagement.vue'),
                 icon: 'icon-yonghuguanli',
                 meta: { requiresAuth: true }
-            }
+            },
+            {
+                label: '管理员首页',
+                path: '/indexManagement',
+                name: 'indexManagement',
+                component: () => import( '../views/admin/indexManagement.vue'),
+                icon: 'icon-yonghuguanli',
+                meta: { requiresAuth: true }
+            },
         ]
     }
 ];

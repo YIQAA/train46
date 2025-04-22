@@ -7,7 +7,7 @@ import com.qdu.common.page.PageResponse;
 import com.qdu.dto.req.RefundTicketReqDTO;
 import com.qdu.dto.req.order.TicketOrderCreateReqDTO;
 import com.qdu.dto.req.order.TicketOrderPageQueryReqDTO;
-import com.qdu.dto.resp.RefundTicketRespDTO;
+import com.qdu.dto.resp.user.RefundTicketRespDTO;
 import com.qdu.dto.resp.order.TicketOrderDetailRespDTO;
 import com.qdu.dto.resp.ticketList.UserPassengerRespDTO;
 import com.qdu.service.impl.OrdersServiceImpl;
@@ -15,7 +15,6 @@ import com.qdu.service.impl.TicketServiceImpl;
 import com.qdu.service.impl.UsersServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.View;
 
 /**
  * <p>

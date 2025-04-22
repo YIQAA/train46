@@ -2,7 +2,7 @@ package com.qdu.service;
 
 import com.qdu.dto.req.RefundTicketReqDTO;
 import com.qdu.dto.req.order.TicketOrderCreateReqDTO;
-import com.qdu.dto.resp.RefundTicketRespDTO;
+import com.qdu.dto.resp.user.RefundTicketRespDTO;
 import com.qdu.dto.resp.order.TicketOrderDetailRespDTO;
 import com.qdu.entity.Orders;
 import com.baomidou.mybatisplus.extension.service.IService;

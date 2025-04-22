@@ -34,7 +34,9 @@ public interface StationMapper extends BaseMapper<Station> {
 
     Integer getStationSeqByTrainIdAndStationName(@Param("trainNumber") String trainNumber,@Param("stationName") String stationName);
 
+    //获取车次信息
     List<TrainStationQueryRespDTO> getTrainStationByTrainId(String trainId);
+
 
     String getCityCodeByName(String fromCity);
 }

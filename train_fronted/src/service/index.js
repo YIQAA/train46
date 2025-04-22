@@ -172,19 +172,21 @@ const fetchRefundTicket = async (body) => {
 
 
 
-
-
-
-
-
-
-
 // 用户信息
 const fechUserInfo = async (params) => {
   const { data } = await http({
     method: 'GET',
     url: '/api/user-service/query',
     params
+  })
+  return data
+}
+// 修改用户信息
+const fetchUserUpdate = async (body) => {
+  const { data } = await http({
+    method: 'POST',
+    url: '/api/user-service/update',
+    data: body
   })
   return data
 }
@@ -200,76 +202,55 @@ const fetchInsuranceList = async (params) => {
 
 
 
-
-
-// 乘客删除
-const fetchDeletePassenger = async (body) => {
-  const { data } = await http({
-    method: 'POST',
-    url: '/api/user-service/passenger/remove',
-    data: body
-  })
-  return data
-}
-// 乘客新增
-const fetchAddPassenger = async (body) => {
-  const { data } = await http({
-    method: 'POST',
-    url: '/api/user-service/passenger/save',
-    data: body
-  })
-  return data
-}
-// 乘客修改
-const fetchEditPassenger = async (body) => {
-  const { data } = await http({
-    method: 'POST',
-    url: '/api/user-service/passenger/update',
-    data: body
-  })
-  return data
-}
-
-
-// 修改用户信息
-const fetchUserUpdate = async (body) => {
-  const { data } = await http({
-    method: 'POST',
-    url: '/api/user-service/update',
-    data: body
-  })
-  return data
-}
-
-// 我的票
-const fetchMyTicket = async (params) => {
+//管理员
+// 订单列表
+const fetchAdminTicketList = async (params) => {
   const { data } = await http({
     method: 'GET',
-    url: '/api/order-service/order/ticket/self/page',
+    url: '/api/admin-service/orderList/page',
+    params
+  })
+  return data
+}
+//车站列表
+const fetchStationList = async (params) => {
+  const { data } = await http({
+    method: 'GET',
+    url: '/api/admin-service/stationList',
+    params
+  })
+  return data
+}
+//创建车站
+const fetchCreateStation = async (body) => {
+  const { data } = await http({
+    method: 'POST',
+    url: '/api/admin-service/createStation',
+    data: body
+  })
+  return data
+}
+//查看车次
+const fetchTrainList = async (params) => {
+  const { data } = await http({
+    method: 'GET',
+    url: '/api/admin-service/trainList/query',
     params
   })
   return data
 }
 
 
-// 车站查询
-const fetchRegionStation = async (params) => {
-  const { data } = await http({
-    method: 'GET',
-    url: '/api/ticket-service/region-station/query',
-    params
-  })
-  return data
-}
+
+
+
+
+
 
 export {
   fetchLogin,
   fetchRegister,
   fetchTicketSearch,
-  fetchRegionStation,
-  fetchDeletePassenger,
-  fetchAddPassenger,
-  fetchEditPassenger,
   fetchLogout,
   fetchBuyTicket,
   fetchOrderBySn,
@@ -281,9 +262,12 @@ export {
   fetchOrderCancel,
   fetchOrderStatus,
   fetchUserUpdate,
-  fetchMyTicket,
   fetchRefundTicket,
   fetchMessageByAI,
   fetchBuyInsurance,
-  fetchInsuranceList
+  fetchInsuranceList,
+  fetchAdminTicketList,
+  fetchStationList,
+  fetchCreateStation,
+  fetchTrainList
 }

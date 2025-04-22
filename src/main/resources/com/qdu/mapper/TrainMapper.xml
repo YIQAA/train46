@@ -146,4 +146,51 @@
         WHERE train_id = #{trainId}
         LIMIT 1
     </select>
+    <select id="getAllTrainNumber" resultType="java.lang.String">
+        SELECT DISTINCT train_number
+        FROM train
+        ORDER BY train_number ASC
+    </select>
+    <select id="getTrainStationByTrainNumber" resultType="com.qdu.dto.resp.ticketList.TrainStationQueryRespDTO">
+        SELECT
+            r.station_sequence AS sequence,
+            s.station_name AS stationName,
+            CASE WHEN r.station_sequence = 1 THEN NULL
+                 ELSE DATE_FORMAT(
+                         ADDTIME(
+                                 CONCAT('2000-01-01 ', t.departure_time),
+                                 SEC_TO_TIME(r.arrival_time_offset * 60)
+                         ),
+                         '%H:%i'
+                      )
+                END AS arrivalTime,
+            CASE WHEN r.station_sequence = max_seq.max_sequence THEN NULL
+                 ELSE DATE_FORMAT(
+                         ADDTIME(
+                                 ADDTIME(
+                                         CONCAT('2000-01-01 ', t.departure_time),
+                                         SEC_TO_TIME(r.arrival_time_offset * 60)
+                                 ),
+                                 SEC_TO_TIME(COALESCE(r.stop_duration, 0) * 60)
+                         ),
+                         '%H:%i'
+                      )
+                END AS departureTime,
+            COALESCE(r.stop_duration, 0) AS stopoverTime
+        FROM
+            train t
+                JOIN route r ON t.train_number = r.train_number
+                JOIN station s ON r.station_id = s.station_id
+                JOIN (
+                SELECT
+                    train_number,
+                    MAX(station_sequence) AS max_sequence
+                FROM route
+                GROUP BY train_number
+            ) max_seq ON r.train_number = max_seq.train_number
+        WHERE
+            t.train_number = #{trainNumber}
+        ORDER BY
+            r.station_sequence
+    </select>
 </mapper>

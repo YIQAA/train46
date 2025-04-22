@@ -1,5 +1,7 @@
 package com.qdu.service.impl;
 
+import com.qdu.dto.req.admin.StationCreateRepDTO;
+import com.qdu.dto.resp.admin.StationListRespDTO;
 import com.qdu.dto.resp.ticketList.CityQueryRespDTO;
 import com.qdu.dto.resp.ticketList.TrainStationQueryRespDTO;
 import com.qdu.entity.Station;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -79,11 +82,37 @@ public class StationsServiceImpl extends ServiceImpl<StationMapper, Station> imp
         return baseMapper.getStationNameByid(stationId);
     }
 
+
     //根据trainid查询该车次的所有经过站
     List<TrainStationQueryRespDTO> getTrainStationByTrainId(String trainId) {
         return baseMapper.getTrainStationByTrainId(trainId);
     }
+    @Override
+    public List<StationListRespDTO> getAdminAllStations() {
 
+        List<Station> stationList = baseMapper.selectList(null);
+        List<StationListRespDTO> stationListRespDTOS = new ArrayList<>();
+        for (Station station : stationList) {
+            StationListRespDTO stationListRespDTO = new StationListRespDTO();
+            stationListRespDTO.setStationId(String.valueOf(station.getStationId()));
+            stationListRespDTO.setStationName(station.getStationName());
+            stationListRespDTO.setCity(station.getCity());
+            stationListRespDTO.setCityCode(station.getCityCode());
+            stationListRespDTOS.add(stationListRespDTO);
+        }
+        return stationListRespDTOS;
+    }
+
+    @Override
+    public Boolean createStation(StationCreateRepDTO stationCreateRepDTO) {
+        Station station = new Station();
+        station.setStationName(stationCreateRepDTO.getStationName());
+        station.setCity(stationCreateRepDTO.getCityName());
+        station.setCityCode(stationCreateRepDTO.getCityCode());
+        System.out.println("车站"+station.getStationName()+"创建成功"+station.getCity()+"0000"+station.getCityCode());
+        baseMapper.insert(station);
+        return true;
+    }
 
 
 }

@@ -1,6 +1,7 @@
 package com.qdu.mapper;
 
 import com.qdu.dto.domain.StationToStationRouteDTO;
+import com.qdu.dto.resp.ticketList.TrainStationQueryRespDTO;
 import com.qdu.entity.Train;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
@@ -35,4 +36,9 @@ public interface TrainMapper extends BaseMapper<Train> {
                                                     @Param("endStationId") Integer endStationId);
 
     LocalDate findDepartureDateByTrainId(Integer trainId);
+
+    List<String> getAllTrainNumber();
+
+    List<TrainStationQueryRespDTO> getTrainStationByTrainNumber(String trainNumber);
+
 }

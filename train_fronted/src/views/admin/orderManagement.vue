@@ -12,148 +12,238 @@
           <a-select-option value="1">已支付</a-select-option>
           <a-select-option value="2">已取消</a-select-option>
           <a-select-option value="3">已完成</a-select-option>
+          <a-select-option value="4">已退票</a-select-option>
         </a-select>
       </a-form-item>
       <a-form-item>
         <a-button type="primary" @click="handleSearch">搜索</a-button>
       </a-form-item>
     </a-form>
+    <br>
     <!-- 订单列表表格 -->
-    <a-table :columns="columns" :data-source="orders" :loading="loading">
-      <template #action="{ record }">
-        <a-button @click="toggleDetails(record.orderSn)">详情</a-button>
-      </template>
-      <template #expandedRowRender="{ record }">
-        <div v-if="expandedOrderSn === record.orderSn">
-          <a-table :columns="detailColumns" :data-source="record.passengerDetails" :pagination="false" />
+    <Table
+        :columns="columns"
+        :data-source="state.dataSource"
+        :pagination="false"
+        :loading="state.loading"
+        :bordered="true"
+    >
+      <!-- 自定义渲染旅客信息列 -->
+      <template #passenger="{ text, record }">
+        <div :style="{alignItems: 'center'}">
+          <!-- 显示姓名 -->
+          <div>{{record?.realName }}</div>
+          <br>
+          <!-- 显示证件号码 -->
+          <div>{{ record?.idCard }}</div>
         </div>
       </template>
-    </a-table>
+      <!-- 自定义渲染席位信息列 -->
+      <template #seatType="{ text, record }">
+        <div>
+          <!-- 显示席位类型 -->
+          {{
+            SEAT_CLASS_TYPE_LIST.find(
+                (item) => item.code === record?.seatType
+            )?.label
+          }}
+        </div>
+        <div>
+          <!-- 显示车厢号和座位号 -->
+          <span>{{ record?.carriageNumber }}</span>
+          <span>车</span>
+          <span>{{ record?.seatNumber }}</span>
+          <span>号</span>
+        </div>
+      </template>
+      <!-- 自定义渲染票价列 -->
+      <template #amount="{ text, record }">
+        <div>
+          <!-- 显示车票类型 -->
+          {{
+            TICKET_TYPE_LIST.find((item) => item.value === record?.ticketType)
+                ?.label
+          }}
+        </div>
+        <div :style="{ color: 'orange' }">
+          <!-- 显示票价 -->
+          ￥{{ record?.amount }}
+        </div>
+      </template>
+
+      <!-- 车票状态列 -->
+      <template #status="{ text, record }">
+        <div :style="{ textAlign: 'center' }">
+          <!-- 显示车票状态 -->
+          {{
+            TICKET_STATUS_LIST.find((item) => item.value === record?.status)
+                ?.label ?? '--'
+          }}
+        </div>
+      </template>
+
+      <!-- 自定义渲染车次信息列 -->
+      <template #info="{ text, record }">
+        <div>
+          <!-- 显示订票日期 -->
+          <div class="border">车次：{{ record.trainNumber }}</div>
+          <div>
+            <!-- 显示出发站、到达站和车次 -->
+            <span class="border">{{ record.departureStation }}</span>
+            <span class="border">{{ '-->' }}</span>
+            <span class="border">{{ record.arrivalStation }}</span>
+          </div>
+          <div>
+            <!-- 显示乘车日期、出发时间 -->
+            <span class="margin">{{ record.ridingDate }}</span>
+            <span class="margin">{{ record.departureTime }}</span>
+            <span class="margin">发车</span>
+          </div>
+        </div>
+      </template>
+    </Table>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
-
-import axios from 'axios';
+import {ref, reactive, onMounted, watch} from 'vue';
+import {SEAT_CLASS_TYPE_LIST, TICKET_STATUS_LIST, TICKET_TYPE_LIST} from "@/constants/index.js";
+import {message, Table} from "ant-design-vue";
+import {fetchAdminTicketList} from "@/service/index.js";
+import {useRoute} from "vue-router";
 
 // 搜索表单实例
-
-// 搜索日期范围
-const searchDateRange = ref([]);
-// 搜索订单状态
-const searchStatus = ref(null);
-// 订单列表数据
-const orders = ref([]);
-// 加载状态
-const loading = ref(false);
-// 展开详情的订单号
-const expandedOrderSn = ref(null);
-
+// 响应式状态对象
+const state = reactive({
+  dataSource: [], // 表格数据源
+  current: 1, // 当前页码
+  size: '10', // 每页显示数量
+  loading: false, // 加载状态
+  columns: [], // 表格列配置
+  currentOrder: null, // 当前操作的订单
+  refundOrder: [] // 选择的退票子订单
+});
+const rowState = reactive({
+  dataSource: []
+})
 // 表格列配置
 const columns = [
   {
     title: '订单号',
     dataIndex: 'orderSn',
     key: 'orderSn',
+    customCell: (record) => ({rowSpan: record?.rowSpan}),
+    width: 150
   },
   {
-    title: '乘车日期',
-    dataIndex: 'ridingDate',
-    key: 'ridingDate',
+    title: '用户名',
+    dataIndex: 'userName',
+    key: 'userName',
+    customCell: (record) => ({rowSpan: record?.rowSpan}),
+    width: 100
   },
   {
-    title: '车次',
-    dataIndex: 'trainNumber',
-    key: 'trainNumber',
+    title: '订票时间',
+    dataIndex: 'orderTime',
+    key: 'orderTime',
+    customCell: (record) => ({rowSpan: record?.rowSpan}),
+    width: 120
   },
   {
-    title: '出发站',
-    dataIndex: 'departureStation',
-    key: 'departureStation',
+    title: '车次信息',
+    dataIndex: 'arrival',
+    key: 'arrival',
+    slots: {customRender: 'info'},
+    customCell: (record) => ({rowSpan: record?.rowSpan}),
+    width: 200
   },
   {
-    title: '到达站',
-    dataIndex: 'arrivalStation',
-    key: 'arrivalStation',
+    title: '旅客信息',
+    dataIndex: 'passenger',
+    key: 'passenger',
+    slots: {customRender: 'passenger'},
+    width: 150
   },
   {
-    title: '订单状态',
-    dataIndex: 'orderStatus',
-    key: 'orderStatus',
-    render: (text) => {
-      const statusMap = {
-        0: '待支付',
-        1: '已支付',
-        2: '已取消',
-        3: '已完成',
-      };
-      return statusMap[text];
-    },
+    title: '席位信息',
+    dataIndex: 'seatType',
+    key: 'seatType',
+    slots: {customRender: 'seatType'},
+    width: 150
   },
   {
-    title: '操作',
-    key: 'action',
-    slots: { customRender: 'action' },
-  },
-];
-
-// 详情表格列配置
-const detailColumns = [
-  {
-    title: '乘客姓名',
-    dataIndex: 'realName',
-    key: 'realName',
-  },
-  {
-    title: '证件类型',
-    dataIndex: 'idType',
-    key: 'idType',
-  },
-  {
-    title: '证件号',
-    dataIndex: 'idCard',
-    key: 'idCard',
-  },
-  {
-    title: '票种类型',
-    dataIndex: 'ticketType',
-    key: 'ticketType',
-    render: (text) => {
-      const ticketTypeMap = {
-        0: '成人票',
-        1: '学生票',
-      };
-      return ticketTypeMap[text];
-    },
-  },
-  {
-    title: '车票金额',
+    title: '票价',
     dataIndex: 'amount',
     key: 'amount',
-    render: (text) => `￥${text}`,
+    slots: {customRender: 'amount'},
+    width: 100
   },
+  {
+    title: '车票状态',
+    dataIndex: 'status',
+    key: 'status',
+    slots: {customRender: 'status'},
+    customCell: (record) => ({rowSpan: record.rowSpan}),
+    width: 120
+  }
 ];
+const searchForm = reactive({
+  keyword: '',    // 搜索关键词
+  searchStatus: null,   // 订单状态
+  searchDateRange: [],  // 日期范围
+});
+// 搜索日期范围
+const searchDateRange = ref([]);
+// 搜索订单状态
+const searchStatus = ref(null);
+
+let userId = ref(null);
+
+const {query} = useRoute()
+// 页面加载时获取订单列表
+onMounted(() => {
+  userId = query.userId;
+  getOrders();
+  console.log('数据源');
+  console.log(rowState.dataSource);
+  state.dataSource = rowState.dataSource;
+
+});
 
 // 获取订单列表
-const getOrders = async () => {
-  loading.value = true;
-  try {
-    const response = await axios.get('/api/order-service/order/ticket/page', {
-      params: {
-        userId: '123', // 假设用户 ID 为 123，可根据实际情况修改
-        statusType: searchStatus.value,
-        // 处理日期范围
-        startDate: searchDateRange.value[0] ? searchDateRange.value[0].format('YYYY-MM-DD') : null,
-        endDate: searchDateRange.value[1] ? searchDateRange.value[1].format('YYYY-MM-DD') : null,
-      },
+const getOrders = (current, size, statusType) => {
+  state.loading = true;
+  fetchAdminTicketList({
+    userId,
+    current,
+    size,
+    statusType
+  })
+  .then((res) => {
+    console.log('订单返回信息');
+    console.log(res);
+    let dataSource = [];
+    res.records.map((info) => {
+      console.log('当前处理的记录:', info);
+      info.passengerDetails?.map((item, index) => {
+        dataSource.push({
+          ...info,
+          ...item,
+          rowSpan: index === 0 ? info.passengerDetails.length : 0
+        });
+      });
     });
-    orders.value = response.data.records;
-  } catch (error) {
-    console.error('获取订单列表失败', error);
-  } finally {
-    loading.value = false;
-  }
+    console.log('处理后的数据源:', dataSource);
+    rowState.dataSource = dataSource;
+    state.dataSource = dataSource;
+    state.data = res;
+    state.loading = false;
+  })
+  .catch((err) => {
+    console.error('获取订单列表失败', err);
+    message.error('获取订单列表失败，请稍后重试');
+    state.loading = false;
+  });
 };
 
 // 处理搜索
@@ -161,21 +251,115 @@ const handleSearch = () => {
   getOrders();
 };
 
-// 切换详情展开状态
-const toggleDetails = (orderSn) => {
-  if (expandedOrderSn.value === orderSn) {
-    expandedOrderSn.value = null;
-  } else {
-    expandedOrderSn.value = orderSn;
+// 监听搜索条件变化，实时过滤订单列表
+watch([searchDateRange, searchStatus], ([newDateRange, newStatus]) => {
+  // 每次过滤都从原始数据开始
+  state.dataSource = rowState.dataSource;
+  console.log('监听生效！！！！');
+  console.log(state.dataSource);
+  // 如果有日期范围选择，则进行过滤
+  if (newDateRange?.length) {
+    const startDate = newDateRange[0].toISOString().split('T')[0];
+    const endDate = newDateRange[1].toISOString().split('T')[0];
+    state.dataSource = state.dataSource.filter((item) => {
+      const orderDate = new Date(item.ridingDate).toISOString().split('T')[0];
+      return orderDate >= startDate && orderDate <= endDate;
+    });
   }
-};
 
-// 页面加载时获取订单列表
-onMounted(() => {
-  getOrders();
+  // 如果有订单状态选择，则进行过滤
+  if (newStatus !== null) {
+    const statusInt = parseInt(newStatus);
+    state.dataSource = state.dataSource.filter((item) => {
+      return item.status === statusInt;
+    });
+  }
 });
 </script>
 
-<style scoped>
-/* 可以添加一些自定义样式 */
+<style lang="scss" scoped>
+
+.tabs-container {
+  :deep(.ant-tabs-nav) {
+    margin: 0;
+
+    &:before {
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .ant-tabs-tab {
+      background: #fafafa !important;
+      border: 1px solid #f0f0f0 !important;
+      border-bottom: 0 !important;
+
+
+      &-active {
+        background: #fff !important;
+        border-bottom: 1px solid #fff !important;
+        margin-bottom: -1px;
+      }
+    }
+  }
+
+  :deep(.ant-tabs-content-holder) {
+    border: 1px solid #f0f0f0;
+    border-top: 0;
+    border-radius: 0 0 0px 0px;
+    padding: 16px;
+  }
+}
+
+.tips-txt {
+  background: #fffbe5;
+  border: 1px solid #fbd800;
+  padding: 5px;
+  margin-top: 10px;
+}
+
+
+::v-deep {
+  .ant-table-thead > tr > th {
+    background-color: #f8f8f8;
+  }
+
+  .ant-table-thead .ant-table-cell {
+    background-image: none;
+  }
+
+  .ant-tabs-top > .ant-tabs-nav {
+    margin: 0;
+  }
+
+  .ant-tabs-content-holder {
+    padding: 12px;
+    background-color: #fff;
+    box-sizing: border-box;
+    background-image: none;
+  }
+
+  .custom-modal {
+    .ant-alert-warning {
+      background-color: #fff !important;
+      border: none !important;
+    }
+  }
+}
+
+.order-date {
+  color: #8f9598;
+  padding: 6px 0;
+}
+
+.border {
+  font-weight: bolder;
+  padding: 0 4px;
+}
+
+.margin {
+  padding: 0 4px;
+}
+
+.vertical-buttons {
+  flex-direction: column;
+}
 </style>

@@ -49,4 +49,8 @@ public class Train implements Serializable {
      * 总行程时间（分钟）
      */
     private Integer totalTravelTime;
+    /**
+     * 总距离（公里）
+     */
+    private Integer totalDistance;
 }

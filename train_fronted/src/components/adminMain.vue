@@ -16,7 +16,7 @@
         <!-- 首页 -->
         <a-menu-item key="">
           <template #icon><HomeOutlined /></template>
-          <router-link to="/userManagement">首页</router-link>
+          <router-link to="/indexManagement">首页</router-link>
         </a-menu-item>
 
         <!-- 用户管理 -->

@@ -15,23 +15,14 @@
  * limitations under the License.
  */
 
-package com.qdu.controller;
+package com.qdu.dto.resp.user;
 
-import com.qdu.mapper.StationMapper;
-import com.qdu.service.impl.StationsServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.Data;
 
 /**
- * 列车站点控制层
+ * 车票退款返回详情实体
  *
  */
-@RestController
-@RequiredArgsConstructor
-public class StationController {
-
-
-
-
+@Data
+public class RefundTicketRespDTO {
 }
-

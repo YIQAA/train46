@@ -51,5 +51,8 @@
     <select id="getOrderStatusByOrderSn" resultType="java.lang.Integer">
         select status from orders where order_number = #{orderSn}
     </select>
+    <select id="selectAllOrderSn" resultType="java.lang.String">
+        select order_number from orders
+    </select>
 
 </mapper>

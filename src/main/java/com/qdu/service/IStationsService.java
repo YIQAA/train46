@@ -1,5 +1,7 @@
 package com.qdu.service;
 
+import com.qdu.dto.req.admin.StationCreateRepDTO;
+import com.qdu.dto.resp.admin.StationListRespDTO;
 import com.qdu.entity.Station;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -30,5 +32,12 @@ public interface IStationsService extends IService<Station> {
 
     //根据车站id查车站名称
     String getStationNameById(Integer stationId);
+
+
+    //获取所有站点信息
+    List<StationListRespDTO> getAdminAllStations();
+
+    //创建站点
+    Boolean createStation(StationCreateRepDTO stationCreateRepDTO);
 
 }
