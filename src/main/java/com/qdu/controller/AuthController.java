@@ -66,6 +66,14 @@ public class AuthController {
             String token = JwtUtil.generateToken(userDetails.getUsername());
 
             Users user = userService.getOneByUsername(userDetails.getUsername());
+
+            //更新用户最新登录时间
+            userService.lambdaUpdate()
+                    .setSql("last_login_at = now()")
+                    .eq(Users::getUserName, userDetails.getUsername())
+                    .update();
+
+
             // 4. 构造响应数据（包含用户信息）
             Map<String, Object> responseData = new HashMap<>();
             responseData.put("token", token);

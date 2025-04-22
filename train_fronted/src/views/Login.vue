@@ -252,7 +252,7 @@ const handleLogin = async () => {
       // Cookies.set('username', res.data?.username)
       // 跳转到票务搜索页面
       if (res.userRole === 'admin') {
-        router.push('/adminPage');
+        router.push('/indexManagement');
       } else if (res.userRole === 'user') {
         router.push('/Welcome');
       }
