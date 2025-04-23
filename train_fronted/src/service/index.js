@@ -239,6 +239,24 @@ const fetchTrainList = async (params) => {
   })
   return data
 }
+//查看首页数据
+const fetchIndexData = async (params) => {
+  const { data } = await http({
+    method: 'GET',
+    url: '/api/admin-service/indexData/query',
+    params
+  })
+  return data
+}
+//查看所有用户
+const fetchUserList = async (params) => {
+  const { data } = await http({
+    method: 'GET',
+    url: '/api/admin-service/userList/query',
+    params
+  })
+  return data
+}
 
 
 
@@ -269,5 +287,7 @@ export {
   fetchAdminTicketList,
   fetchStationList,
   fetchCreateStation,
-  fetchTrainList
+  fetchTrainList,
+  fetchIndexData,
+  fetchUserList
 }

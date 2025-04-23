@@ -54,5 +54,9 @@
     <select id="selectAllOrderSn" resultType="java.lang.String">
         select order_number from orders
     </select>
+    <select id="getOrderCountByUserId" resultType="java.lang.Integer">
+        select count(*) from orders where user_id = #{userId}
+    </select>
+
 
 </mapper>

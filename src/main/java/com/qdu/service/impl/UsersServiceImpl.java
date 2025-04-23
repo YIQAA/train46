@@ -1,10 +1,12 @@
 package com.qdu.service.impl;
 
 import com.qdu.dto.req.user.UserRegisterReqDTO;
+import com.qdu.dto.resp.admin.UserListRespDTO;
 import com.qdu.dto.resp.ticketList.UserPassengerRespDTO;
 import com.qdu.dto.resp.user.UserQueryRespDTO;
 import com.qdu.dto.resp.user.UserRegisterRespDTO;
 import com.qdu.entity.Users;
+import com.qdu.mapper.OrdersMapper;
 import com.qdu.mapper.UsersMapper;
 import com.qdu.service.IUsersService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -14,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -25,6 +29,8 @@ import java.time.LocalDateTime;
  */
 @Service
 public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements IUsersService {
+    @Autowired
+    private OrdersMapper ordersService;
 
     @Override
     public UserPassengerRespDTO getUserPassenger(String userName) {
@@ -84,5 +90,24 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
            userQueryRespDTO.setStatus(user.getStatus());
         }
         return userQueryRespDTO;
+    }
+
+    @Override
+    public List<UserListRespDTO> getUserList() {
+        List<Users> users = baseMapper.selectList(null);
+        List<UserListRespDTO> userListRespDTOS = new ArrayList<>();
+        for (Users user : users)
+        {
+            UserListRespDTO userListRespDTO = new UserListRespDTO();
+            userListRespDTO.setUserid(user.getUserId());
+            userListRespDTO.setUsername(user.getUserName());
+            userListRespDTO.setPhone(user.getPhone());
+            userListRespDTO.setOrderAmount(ordersService.getOrderCountByUserId(user.getUserId()));
+            userListRespDTO.setFrozen(user.getStatus().equals("inactive"));
+            userListRespDTOS.add(userListRespDTO);
+        }
+
+
+        return userListRespDTOS;
     }
 }

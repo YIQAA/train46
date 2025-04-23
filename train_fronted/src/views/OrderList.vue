@@ -15,7 +15,6 @@
   <Table
       :columns="state.columns"
       :data-source="state.dataSource"
-      :pagination="false"
       :loading="state.loading"
       :bordered="true"
   >
@@ -118,24 +117,6 @@
     </template>
   </Table>
 
-  <!-- 分页组件，显示在页面底部 -->
-  <div
-      :style="{
-      width: '100%',
-      marginTop: '20px',
-      display: 'flex',
-      justifyContent: 'end'
-    }"
-  >
-    <Pagination
-        :show-total="(total) => `总共 ${state.data?.total} 条`"
-        :current="state.current"
-        :size="state.size"
-        :total="state.data?.total"
-        show-size-changer
-        @change="handlePage"
-    ></Pagination>
-  </div>
   <!-- 温馨提示区域 -->
   <div class="tips-txt">
     <h2 :style="{ fontSize: '16px' }">温馨提示：</h2>

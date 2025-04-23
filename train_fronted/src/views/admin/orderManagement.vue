@@ -24,7 +24,6 @@
     <Table
         :columns="columns"
         :data-source="state.dataSource"
-        :pagination="false"
         :loading="state.loading"
         :bordered="true"
     >

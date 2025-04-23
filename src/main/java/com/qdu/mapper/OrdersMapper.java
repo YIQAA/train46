@@ -34,4 +34,7 @@ public interface OrdersMapper extends BaseMapper<Orders> {
     Integer getOrderStatusByOrderSn(String orderSn);
 
     List<String> selectAllOrderSn(Object o);
+
+
+    Integer getOrderCountByUserId(Integer userId);
 }

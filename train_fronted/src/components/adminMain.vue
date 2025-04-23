@@ -66,7 +66,7 @@
     <a-layout>
       <a-layout-header style="background: #02172b; padding: 0 24px">
         <div style="text-align: right">
-          <a-button type="primary">退出登录</a-button>
+          <a-button type="primary" @click="logout">退出登录</a-button>
         </div>
       </a-layout-header>
 

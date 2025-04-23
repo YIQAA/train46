@@ -16,11 +16,16 @@
     </a-form>
     <!-- 用户列表表格 -->
     <a-table :columns="columns" :data-source="users" :loading="loading">
+      <template #frozen="{ record }">
+        <div v-if="record.frozen">冻结</div>
+        <div v-else>正常</div>
+      </template>
+
       <template #action="{ record }">
-        <a-button @click="toggleFreeze(record.id, record.frozen)">
+        <a-button @click="toggleFreeze(record.userid, record.frozen)">
           {{ record.frozen ? '解冻' : '冻结' }}
         </a-button>
-        <a-button @click="viewOrderHistory(record.id)">查看历史订单</a-button>
+        <a-button @click="viewOrderHistory(record.userid)">查看历史订单</a-button>
       </template>
     </a-table>
   </div>
@@ -29,7 +34,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-
+import {fetchUserList} from '@/service/index';
+import router from "@/router/index.js";
 // 搜索手机号
 const searchPhone = ref('');
 // 用户列表数据
@@ -41,8 +47,8 @@ const loading = ref(false);
 const columns = [
   {
     title: 'ID',
-    dataIndex: 'id',
-    key: 'id',
+    dataIndex: 'userid',
+    key: 'userid',
   },
   {
     title: '用户名',
@@ -61,8 +67,9 @@ const columns = [
   },
   {
     title: '状态',
-    dataIndex: 'status',
-    key: 'status'
+    dataIndex: 'frozen',
+    key: 'frozen',
+    slots: { customRender: 'frozen' },
   },
   {
     title: '操作',
@@ -75,10 +82,13 @@ const columns = [
 const getUsers = async (phone = '') => {
   loading.value = true;
   try {
-    const response = await axios.get('/api/admin/users', {
-      params: { phone },
-    });
-    users.value = response.data;
+
+    fetchUserList().then((response) => {
+      console.log('获取用户列表成功')
+      console.log(response);
+      users.value = response;
+    })
+
   } catch (error) {
     console.error('获取用户列表失败', error);
   } finally {
@@ -108,8 +118,7 @@ const toggleFreeze = async (userId, isFrozen) => {
 // 查看用户历史订单
 const viewOrderHistory = async (userId) => {
   try {
-    const response = await axios.get(`/api/admin/users/${userId}/orders`);
-    console.log('用户历史订单:', response.data);
+    await router.push({path: '/orderManagement', query: {userId}})
     // 这里可以添加弹窗或跳转页面来显示订单详情
   } catch (error) {
     console.error('查看用户历史订单失败', error);

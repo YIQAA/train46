@@ -826,7 +826,7 @@ const handleTabChange = (tabKey) => {
 
       <!-- ***车次列表信息表格*** *******************************************************************************************-->
       <div class="custome-table">
-        <Table :columns="columns" :data-source="state.trainList" :pagination="false"
+        <Table :columns="columns" :data-source="state.trainList"
                :rowKey="record => `${record.trainId}-${record.departureTime}`">
 
           <!-- 车次号及标签显示 -->
