@@ -131,6 +131,7 @@ const getBotResponse = async (input, tempId) => {
   try {
     const response = await fetchMessageByAI({ message: input });
     const index = messages.value.findIndex(msg => msg.id === tempId);
+    console.log(response);
 
     // 增强表格处理逻辑
     const processedContent = response.type === 'table' ? {
@@ -154,7 +155,7 @@ const getBotResponse = async (input, tempId) => {
         });
         return record;
       })
-    } : response.content;
+    } : response.content.text;
 
     const newMessage = {
       id: tempId,

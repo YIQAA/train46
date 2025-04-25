@@ -37,7 +37,15 @@
         <!-- 用户管理 -->
         <a-menu-item key="/orderManagement">
           <template #icon><MoneyCollectOutlined /></template>
-          <router-link to="/orderManagement">订单管理</router-link>
+          <router-link to="/orderManagement">车票订单管理</router-link>
+        </a-menu-item>
+        <a-menu-item key="/">
+          <template #icon><MoneyCollectOutlined /></template>
+          <router-link to="/">保险订单管理</router-link>
+        </a-menu-item>
+        <a-menu-item key="/">
+          <template #icon><MoneyCollectOutlined /></template>
+          <router-link to="/">反馈意见管理</router-link>
         </a-menu-item>
 <!--        &lt;!&ndash; 车次管理（带子菜单） &ndash;&gt;-->
 <!--        <a-sub-menu key="/train">-->

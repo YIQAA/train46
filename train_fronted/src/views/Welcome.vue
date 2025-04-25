@@ -20,13 +20,13 @@
           </a-card>
         </a-col>
         <a-col :span="6">
-          <a-card title="接送站服务" @click="handlePickupAndDropoff">
-            <img src="../assets/01.jpg" alt="接送站服务图片" />
+          <a-card title="意见反馈" @click="handleFeedBack">
+            <img src="../assets/01.jpg" alt="服务图片" />
           </a-card>
         </a-col>
         <a-col :span="6">
           <a-card title="保险服务" @click="handleInsurance">
-            <img src="../assets/02.jpg" alt="重点旅客预约图片" />
+            <img src="../assets/02.jpg" alt="服务图片" />
           </a-card>
         </a-col>
         <a-col :span="6">
@@ -69,16 +69,16 @@ const travelRecommendations = ref([
   }
 ]);
 
-// 车票预订点击事件处理
-const handleTicketBooking = () => {
-  console.log('点击了车票预订');
-  // 这里可以添加跳转到车票预订页面的逻辑
+
+const handleFeedBack = () => {
+  router.push({ path: '/feedback' });
+  console.log('点击了反馈服务');
+
 };
 //点击保险
 const handleInsurance = () => {
   router.push({ path: '/insurance' });
-  console.log('点击了保险');
-  // 这里可以添加跳转到保险页面的逻辑
+  console.log('点击了保险服务');
 };
 
 </script>

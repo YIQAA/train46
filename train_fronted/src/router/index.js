@@ -95,6 +95,15 @@ const routes = [
             icon: 'icon-baoxian',
             meta: { requiresAuth: true }
         },
+        //问题反馈
+        {
+            label: '问题反馈',
+            path: '/feedback',
+            name: 'feedback',
+            component: () => import( '../views/user/Feedback.vue'),
+            icon: 'icon-baoxian',
+            meta: { requiresAuth: true }
+        },
 
         ]
     },
