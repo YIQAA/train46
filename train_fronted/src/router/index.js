@@ -156,6 +156,14 @@ const routes = [
                 icon: 'icon-yonghuguanli',
                 meta: { requiresAuth: true }
             },
+            {
+                label: '投诉信息列表',
+                path: '/feedBackManagement',
+                name: 'feedBackManagement',
+                component: () => import( '../views/admin/feedBackManagement.vue'),
+                icon: 'icon-yonghuguanli',
+                meta: { requiresAuth: true }
+            },
         ]
     }
 ];

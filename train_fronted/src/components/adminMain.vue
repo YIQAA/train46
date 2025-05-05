@@ -43,30 +43,10 @@
           <template #icon><MoneyCollectOutlined /></template>
           <router-link to="/">保险订单管理</router-link>
         </a-menu-item>
-        <a-menu-item key="/">
+        <a-menu-item key="/feedBackManagement">
           <template #icon><MoneyCollectOutlined /></template>
-          <router-link to="/">反馈意见管理</router-link>
+          <router-link to="/feedBackManagement">反馈意见管理</router-link>
         </a-menu-item>
-<!--        &lt;!&ndash; 车次管理（带子菜单） &ndash;&gt;-->
-<!--        <a-sub-menu key="/train">-->
-<!--          <template #icon><CarOutlined /></template>-->
-
-<!--          <template #title>车次管理</template>-->
-<!--          <a-menu-item key="/train/stationList">-->
-<!--            <router-link to="/train/stationList">车站管理</router-link>-->
-<!--          </a-menu-item>-->
-<!--          <a-menu-item key="/trainManagement">-->
-<!--            <router-link to="/trainManagement">车次列表</router-link>-->
-<!--          </a-menu-item>-->
-<!--          <a-menu-item key="/train/add-train">-->
-<!--            <router-link to="/train/add-train">添加车次</router-link>-->
-<!--          </a-menu-item>-->
-<!--          <a-menu-item key="/train/ticketList">-->
-<!--            <router-link to="/train/ticketList">车次列表</router-link>-->
-<!--          </a-menu-item>-->
-<!--        </a-sub-menu>-->
-
-
       </a-menu>
     </a-layout-sider>
 

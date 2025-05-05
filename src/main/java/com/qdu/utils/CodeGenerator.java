@@ -23,7 +23,7 @@ public class CodeGenerator {
 //                                    "orders","seat_occupancy","customer_service_sessions","knowledge_base"
                 .strategyConfig(builder -> {
                     builder.addInclude(
-                                    "insurance_orders") // 指定表名
+                                    "feedback") // 指定表名
                             .entityBuilder()
                             .enableLombok()
                             .controllerBuilder()

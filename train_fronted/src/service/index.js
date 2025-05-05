@@ -190,6 +190,25 @@ const fetchUserUpdate = async (body) => {
   })
   return data
 }
+//提交投诉
+const fetchFeedBack = async (body) => {
+  const { data } = await http({
+    method: 'POST',
+    url: '/api/user-service/feedback',
+    data: body
+  })
+  return data
+}
+//获取投诉列表
+const fetchUserFeedBack = async (params) => {
+  const { data } = await http({
+    method: 'GET',
+    url: '/api/user-service/feedback/history',
+    params
+  })
+  return data
+}
+
 //获取保险列表
 const fetchInsuranceList = async (params) => {
   const { data } = await http({
@@ -257,7 +276,33 @@ const fetchUserList = async (params) => {
   })
   return data
 }
-
+//投诉列表
+const fetchComplainList = async (params) => {
+  const { data } = await http({
+    method: 'GET',
+    url: '/api/admin-service/complainList/query',
+    params
+  })
+  return data
+}
+//提交投诉回复
+const fetchComplainReply = async (body) => {
+  const { data } = await http({
+    method: 'POST',
+    url: '/api/admin-service/complainList/reply',
+    data: body
+  })
+  return data
+}
+//修改投诉状态
+const fetchComplainUpdate = async (body) => {
+  const { data } = await http({
+    method: 'POST',
+    url: '/api/admin-service/complainList/updateStatus',
+    data: body
+  })
+  return data
+}
 
 
 
@@ -289,5 +334,11 @@ export {
   fetchCreateStation,
   fetchTrainList,
   fetchIndexData,
-  fetchUserList
+  fetchUserList,
+  fetchFeedBack,
+  fetchUserFeedBack,
+  fetchComplainList,
+  fetchComplainReply,
+  fetchComplainUpdate
+
 }

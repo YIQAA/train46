@@ -1,285 +1,227 @@
 <template>
-  <div class="dashboard">
-    <h1>运营数据看板</h1>
-    <div class="chart-grid">
-      <div class="chart-item">
-        <div class="chart-container" ref="lineChartDom" :style="{ height: '400px', width: '100%' }"></div>
-      </div>
-      <div class="chart-item">
-        <div class="chart-container" ref="barChartDom" :style="{ height: '400px', width: '100%' }"></div>
-      </div>
-      <div class="chart-item">
-        <div class="chart-container" ref="pieChartDom" :style="{ height: '400px', width: '100%' }"></div>
-      </div>
-      <div class="chart-item">
-        <div class="chart-container" ref="dailyOrderLineChartDom" :style="{ height: '400px', width: '100%' }"></div>
-      </div>
-    </div>
-  </div>
+  <a-card class="feedback-container">
+    <h2 class="form-title">意见反馈</h2>
+
+    <!-- 反馈表单 -->
+    <a-form
+        :model="formState"
+        @finish="handleSubmit"
+        class="feedback-form"
+        :label-col="{ span: 4 }"
+        :wrapper-col="{ span: 18 }"
+    >
+      <a-form-item label="反馈类型" name="type">
+        <a-radio-group v-model:value="formState.feedbackType">
+          <a-radio-button value="suggestion">建议</a-radio-button>
+          <a-radio-button value="complaint">投诉</a-radio-button>
+          <a-radio-button value="system_error">系统问题</a-radio-button>
+        </a-radio-group>
+      </a-form-item>
+
+      <a-form-item
+          label="问题标题"
+          name="title"
+          :rules="[{ required: true, message: '请输入问题标题' }]"
+      >
+        <a-input
+            v-model:value="formState.title"
+            placeholder="请简要描述您的问题"
+        />
+      </a-form-item>
+
+      <a-form-item
+          label="详细描述"
+          name="content"
+          :rules="[{ required: true, message: '请输入详细描述' }]"
+      >
+        <a-textarea
+            v-model:value="formState.content"
+            placeholder="请详细描述您遇到的问题或建议..."
+            :rows="4"
+        />
+      </a-form-item>
+
+      <a-form-item label="联系方式" name="contact">
+        <a-input
+            v-model:value="formState.contact"
+            placeholder="手机/邮箱（选填）"
+        />
+      </a-form-item>
+
+      <a-form-item :wrapper-col="{ offset: 4 }">
+        <a-button
+            type="primary"
+            html-type="submit"
+            :loading="submitting"
+        >
+          提交反馈
+        </a-button>
+      </a-form-item>
+    </a-form>
+
+    <!-- 反馈历史 -->
+    <a-divider />
+    <h3>历史反馈</h3>
+    <a-list
+        :data-source="historyList"
+        :loading="loadingHistory"
+        item-layout="vertical"
+    >
+      <template #renderItem="{ item }">
+        <a-list-item>
+          <template #actions>
+            <span>{{ formatTime(item.created_at) }}</span>
+            <a-tag :color="statusColors[item.status]">
+              {{ statusMap[item.status] }}
+            </a-tag>
+          </template>
+          <a-list-item-meta
+              :title="item.title"
+              :description="`类型：${typeMap[item.feedbackType]}`"
+          />
+          <div class="content">{{ item.content }}</div>
+          <div v-if="item.reply_content" class="reply-content">
+            <a-alert
+                message="管理员回复"
+                type="info"
+                :description="item.reply_content"
+                show-icon
+            />
+          </div>
+        </a-list-item>
+      </template>
+    </a-list>
+  </a-card>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import * as echarts from 'echarts/core'
-import { LineChart, BarChart, PieChart } from 'echarts/charts'
-import {
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  DatasetComponent,
-  LegendComponent
-} from 'echarts/components'
-import { LabelLayout } from 'echarts/features'
-import { CanvasRenderer } from 'echarts/renderers'
+import { reactive, ref, onMounted } from 'vue'
+import { message } from 'ant-design-vue'
+import dayjs from 'dayjs'
+import {fetchFeedBack,fetchUserFeedBack} from "@/service/index.js";
+// 表单状态
+const formState = reactive({
+  feedbackType: 'suggestion',
+  title: '',
+  content: '',
+  contact: '',
+  userId:  localStorage.getItem('userId')
+})
 
-echarts.use([
-  LineChart,
-  BarChart,
-  PieChart,
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  DatasetComponent,
-  LegendComponent,
-  LabelLayout,
-  CanvasRenderer
-])
+const submitting = ref(false)
 
-// 模拟API获取数据
-const mockData = {
-  dates: ['2023-01-01', '2023-01-02', '2023-01-03'],
-  counts: [1200, 2400, 1800]
+// 反馈类型映射
+const typeMap = {
+  suggestion: '建议',
+  complaint: '投诉',
+  system_error: '系统问题'
 }
 
-const lineOptions = ref({
-  title: {
-    text: '每日乘车人数趋势',
-    left: 'center'
-  },
-  tooltip: {
-    trigger: 'axis'
-  },
-  xAxis: {
-    type: 'category',
-    data: mockData.dates,
-    axisLabel: {
-      formatter: (value) => value.split('-').slice(1).join('/')
-    }
-  },
-  yAxis: {
-    type: 'value',
-    name: '人次'
-  },
-  series: [{
-    data: mockData.counts,
-    type: 'line',
-    smooth: true,
-    areaStyle: {
-      color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-        { offset: 0, color: '#83bff6' },
-        { offset: 1, color: '#188df0' }
-      ])
-    },
-    itemStyle: {
-      color: '#188df0'
-    }
-  }]
-})
+// 状态映射
+const statusMap = {
+  pending: '待处理',
+  processing: '处理中',
+  resolved: '已解决',
+  rejected: '已驳回'
+}
 
-// 各车站车次数量柱状图
-const barOptions = ref({
-  title: {
-    text: '各车站车次数量',
-    left: 'center'
-  },
-  xAxis: {
-    type: 'category',
-    data: ['车站A', '车站B', '车站C'],
-    axisLabel: {
-      rotate: 45
-    }
-  },
-  yAxis: {
-    type: 'value',
-    name: '车次数量'
-  },
-  series: [{
-    data: [10, 20, 15],
-    type: 'bar',
-    itemStyle: {
-      color: '#a5d8ff'
-    }
-  }]
-})
+const statusColors = {
+  pending: 'gold',
+  processing: 'blue',
+  resolved: 'green',
+  rejected: 'red'
+}
 
-// 不同座位类型销售占比饼图
-const pieOptions = ref({
-  title: {
-    text: '不同座位类型销售占比',
-    left: 'center'
-  },
-  tooltip: {
-    trigger: 'item'
-  },
-  series: [{
-    type: 'pie',
-    radius: '60%',
-    data: [
-      { value: 45, name: '商务座' },
-      { value: 120, name: '一等座' },
-      { value: 435, name: '二等座' }
-    ],
-    emphasis: {
-      itemStyle: {
-        shadowBlur: 10,
-        shadowOffsetX: 0,
-        shadowColor: 'rgba(0, 0, 0, 0.5)'
-      }
-    }
-  }]
-})
+// 历史记录
+const historyList = ref([])
+const loadingHistory = ref(false)
 
-// 每日订单数量趋势折线图
-const dailyOrderLineOptions = ref({
-  title: {
-    text: '每日订单数量趋势',
-    left: 'center'
-  },
-  tooltip: {
-    trigger: 'axis'
-  },
-  xAxis: {
-    type: 'category',
-    data: ['2023-01-01', '2023-01-02', '2023-01-03'],
-    axisLabel: {
-      formatter: (value) => value.split('-').slice(1).join('/')
-    }
-  },
-  yAxis: {
-    type: 'value',
-    name: '订单数量'
-  },
-  series: [{
-    data: [50, 80, 60],
-    type: 'line',
-    smooth: true,
-    areaStyle: {
-      color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-        { offset: 0, color: '#f683b3' },
-        { offset: 1, color: '#f0188d' }
-      ])
-    },
-    itemStyle: {
-      color: '#f0188d'
-    }
-  }]
-})
+// 格式化时间
+const formatTime = (time) => {
+  return dayjs(time).format('YYYY-MM-DD HH:mm')
+}
 
-
-const lineChartDom = ref(null)
-const barChartDom = ref(null)
-const pieChartDom = ref(null)
-const dailyOrderLineChartDom = ref(null)
-const userRoleBarChartDom = ref(null)
-let lineChart = null
-let barChart = null
-let pieChart = null
-let dailyOrderLineChart = null
-let userRoleBarChart = null
-
-const fetchRealTimeData = async () => {
+// 提交处理
+const handleSubmit = async () => {
   try {
-    const res = await fetch('/api/passenger-flow')
-    const data = await res.json()
-    lineOptions.value.series[0].data = data.counts
-    lineOptions.value.xAxis.data = data.dates
-    lineChart.setOption(lineOptions.value)
+    submitting.value = true
+
+    // 模拟API调用
+    fetchFeedBack (formState).then((res) => {
+      console.log('res',res)
+    })
+    console.log('提交数据：', JSON.parse(JSON.stringify(formState)))
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    message.success('反馈提交成功')
+    formState.title = ''
+    formState.content = ''
+    formState.contact = ''
+
+    // 刷新历史记录
+    loadHistory()
   } catch (error) {
-    console.error('数据获取失败:', error)
+    message.error('提交失败，请稍后重试')
+  } finally {
+    submitting.value = false
   }
 }
 
-onMounted(() => {
-  lineChart = echarts.init(lineChartDom.value)
-  lineChart.setOption(lineOptions.value)
+// 加载历史记录
+const loadHistory = async () => {
+  try {
+    loadingHistory.value = true
 
-  barChart = echarts.init(barChartDom.value)
-  barChart.setOption(barOptions.value)
+    // 模拟数据
+    historyList.value = [
+      {
+        id: 1,
+        feedbackType: 'system_error',
+        title: '支付页面加载缓慢',
+        content: '在点击支付按钮后页面响应时间过长',
+        status: 'resolved',
+        created_at: '2023-08-20 14:30:00',
+        reply_content: '已优化支付接口响应速度，感谢反馈'
+      }
+    ]
+    fetchUserFeedBack({userId: formState.userId}).then((res) => {
+      console.log('res',res)
+      historyList.value = res
 
-  pieChart = echarts.init(pieChartDom.value)
-  pieChart.setOption(pieOptions.value)
 
-  dailyOrderLineChart = echarts.init(dailyOrderLineChartDom.value)
-  dailyOrderLineChart.setOption(dailyOrderLineOptions.value)
-
-  userRoleBarChart = echarts.init(userRoleBarChartDom.value)
-  userRoleBarChart.setOption(userRoleBarOptions.value)
-
-  window.addEventListener('resize', handleResize)
-
-  setInterval(fetchRealTimeData, 5000) // 每5秒更新
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', handleResize)
-  lineChart?.dispose()
-  barChart?.dispose()
-  pieChart?.dispose()
-  dailyOrderLineChart?.dispose()
-  userRoleBarChart?.dispose()
-})
-
-const handleResize = () => {
-  lineChart?.resize()
-  barChart?.resize()
-  pieChart?.resize()
-  dailyOrderLineChart?.resize()
-  userRoleBarChart?.resize()
+    })
+  } catch (error) {
+    message.error('加载历史记录失败')
+  } finally {
+    loadingHistory.value = false
+  }
 }
 
-watch(() => lineOptions.value, (newVal) => {
-  lineChart?.setOption(newVal)
+// 初始化加载
+onMounted(() => {
+  loadHistory()
 })
-
-watch(() => barOptions.value, (newVal) => {
-  barChart?.setOption(newVal)
-})
-
-watch(() => pieOptions.value, (newVal) => {
-  pieChart?.setOption(newVal)
-})
-
-watch(() => dailyOrderLineOptions.value, (newVal) => {
-  dailyOrderLineChart?.setOption(newVal)
-})
-
 </script>
 
 <style scoped>
-.dashboard {
-  padding: 20px;
+.feedback-container {
+  max-width: 800px;
+  margin: 20px auto;
 }
 
-.chart-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
+.form-title {
+  color: rgba(0, 0, 0, 0.85);
+  font-size: 20px;
+  margin-bottom: 24px;
+  text-align: center;
 }
 
-.chart-item {
-  background: white;
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.content {
+  color: rgba(0, 0, 0, 0.65);
+  margin-bottom: 12px;
 }
 
-.chart-container {
-  min-height: 300px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-  margin-bottom: 20px;
+.reply-content {
+  margin-top: 16px;
 }
 </style>
