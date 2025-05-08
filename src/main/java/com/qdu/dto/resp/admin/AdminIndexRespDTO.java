@@ -1,8 +1,6 @@
 package com.qdu.dto.resp.admin;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Data
 @Getter
@@ -24,6 +22,8 @@ public class AdminIndexRespDTO {
 
     // 实时数据模型
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class RealTimeData {
         private Integer todayViewCount;       // 今日浏览人数
         private Integer todayNewOrderCount;   // 今日新增订单
@@ -34,6 +34,8 @@ public class AdminIndexRespDTO {
     // 趋势数据模型（乘车人数/订单共用结构）
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class TrendData {
         private String[] dates;               // 日期序列 ["2023-01-01",...]
         private Integer[] counts;             // 数值序列 [1200,...]
@@ -41,6 +43,8 @@ public class AdminIndexRespDTO {
 
     // 排行数据模型（车站/车次共用结构）
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class RankData {
         private String[] names;               // 名称序列 ["车站A","车次B",...]
         private Integer[] values;              // 排行数值 [1000, 800,...]

@@ -34,7 +34,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import {fetchUserList} from '@/service/index';
+import {fetchUserList  ,fetchUserFreeze} from '@/service/index';
 import router from "@/router/index.js";
 // 搜索手机号
 const searchPhone = ref('');
@@ -104,12 +104,13 @@ const searchUsers = () => {
 // 冻结/解冻用户
 const toggleFreeze = async (userId, isFrozen) => {
   try {
-    const response = await axios.put(`/api/admin/users/${userId}/freeze`, {
-      frozen: !isFrozen,
-    });
-    if (response.status === 200) {
-      getUsers(searchPhone.value);
-    }
+
+    fetchUserFreeze({userId: userId, freeze: !isFrozen}).then((response) => {});
+
+    await getUsers(searchPhone.value);
+    //刷新页面
+    router.go(0);
+
   } catch (error) {
     console.error('冻结/解冻用户失败', error);
   }
@@ -132,5 +133,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 可以添加一些自定义样式 */
+
 </style>

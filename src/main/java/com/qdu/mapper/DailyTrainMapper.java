@@ -18,4 +18,6 @@ import java.util.Date;
 public interface DailyTrainMapper extends BaseMapper<DailyTrain> {
 
     DailyTrain getDailyTrainByNumberAndDate(@Param("trainNumber") String trainNumber,@Param("departureDate") LocalDate departureDate);
+
+    Integer getTodayTrainCount();
 }

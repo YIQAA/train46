@@ -193,4 +193,22 @@
         ORDER BY
             r.station_sequence
     </select>
+    <select id="getSimpleTrainOccupancy" resultType="java.util.Map">
+        SELECT
+            dt.train_number,
+            ROUND(
+                    COUNT(DISTINCT op.passenger_id) * 100.0 /
+                    MAX(dt.total_seats),  -- 直接使用预存的总座位数
+                    0
+            ) AS occupancy_rate
+        FROM daily_train dt
+                 LEFT JOIN seat s ON dt.train_id = s.train_id
+                 LEFT JOIN order_passengers op ON s.seat_id = op.seat_id
+                 LEFT JOIN orders o ON op.order_id = o.order_id
+            AND o.status IN (1,3)  -- 有效订单状态
+        WHERE dt.departure_date = CURDATE()
+        GROUP BY dt.train_number
+        ORDER BY occupancy_rate DESC
+            LIMIT 5
+    </select>
 </mapper>

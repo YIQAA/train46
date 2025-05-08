@@ -1,8 +1,11 @@
 package com.qdu.mapper;
 
+import com.qdu.dto.resp.admin.OrderTrendDTO;
 import com.qdu.entity.OrderPassengers;
+import com.qdu.dto.resp.admin.PassengerTrendDTO;
 import com.qdu.entity.Orders;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.qdu.service.impl.AdminServiceImpl;
 
 import java.util.List;
 
@@ -37,4 +40,12 @@ public interface OrdersMapper extends BaseMapper<Orders> {
 
 
     Integer getOrderCountByUserId(Integer userId);
+
+    Integer getTodayOrderCount();
+
+    Integer getTodayPassengerCount();
+
+    List<PassengerTrendDTO> getPassengerTrend(int days);
+
+    List<OrderTrendDTO> getOrderTrend(int days);
 }

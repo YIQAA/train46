@@ -1,5 +1,6 @@
 package com.qdu.service.impl;
 
+import com.qdu.dto.req.admin.ToggleFreezeUserReqDTO;
 import com.qdu.dto.req.user.UserRegisterReqDTO;
 import com.qdu.dto.resp.admin.UserListRespDTO;
 import com.qdu.dto.resp.ticketList.UserPassengerRespDTO;
@@ -109,5 +110,17 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
 
         return userListRespDTOS;
+    }
+
+    @Override
+    public void toggleFreezeUser(ToggleFreezeUserReqDTO requestParam) {
+        Users user = baseMapper.getOneByUserId(requestParam.getUserId());
+        if(requestParam.getFreeze())
+        {
+            user.setStatus("inactive");
+        }else {
+            user.setStatus("active");
+        }
+        baseMapper.updateById(user);
     }
 }

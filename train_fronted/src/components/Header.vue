@@ -1,7 +1,7 @@
 <template>
   <a-layout-header class="header">
     <div class="logo">
-      <router-link to="/welcome" style="color: white; font-size: 18px">IKUN12306</router-link>
+      <router-link to="/welcome" style="color: white; font-size: 18px">青大12306</router-link>
     </div>
     <div style="float: right; color: white;">
       您好，{{userName}}

@@ -1,5 +1,6 @@
 package com.qdu.mapper;
 
+import com.qdu.dto.resp.admin.StationFlowDTO;
 import com.qdu.dto.resp.ticketList.CityQueryRespDTO;
 import com.qdu.dto.resp.ticketList.TrainStationQueryRespDTO;
 import com.qdu.entity.Station;
@@ -39,4 +40,6 @@ public interface StationMapper extends BaseMapper<Station> {
 
 
     String getCityCodeByName(String fromCity);
+
+    List<StationFlowDTO> getStationTop5Flow();
 }

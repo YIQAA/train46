@@ -86,5 +86,23 @@
     <select id="getCityCodeByName" resultType="java.lang.String">
         select distinct city_code from station where city = #{city}
     </select>
+    <select id="getStationTop5Flow" resultType="com.qdu.dto.resp.admin.StationFlowDTO">
+        SELECT
+            s.station_name AS stationName,
+            IFNULL(SUM(tmp.flow_count), 0) AS flowCount
+        FROM station s
+                 LEFT JOIN (
+            SELECT start_station_id AS station_id, COUNT(*) AS flow_count
+            FROM orders
+            GROUP BY start_station_id
+            UNION ALL
+            SELECT end_station_id AS station_id, COUNT(*) AS flow_count
+            FROM orders
+            GROUP BY end_station_id
+        ) tmp ON s.station_id = tmp.station_id
+        GROUP BY s.station_id
+        ORDER BY flowCount DESC
+            LIMIT 5
+    </select>
 
 </mapper>

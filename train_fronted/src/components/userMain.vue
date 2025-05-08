@@ -33,7 +33,7 @@
 
 <script setup>
 import HeaderView from "@/components/Header.vue";
-import SiderView from "@/components/Sider.vue";
+
 import {ref, onMounted} from 'vue';
 
 

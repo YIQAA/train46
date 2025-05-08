@@ -20,4 +20,8 @@ public interface UsersMapper extends BaseMapper<Users> {
     Users getOneByUsername(String username);
 
     String getUserNameByUserId(Integer userId);
+
+    Users getOneByUserId(Integer userId);
+
+    Integer getTodayViewCount();
 }

@@ -371,19 +371,19 @@ const registerSubmit = async () => {
   text-align: left;
   justify-content: center;
   font-family: 'Mukta', sans-serif;
-  color: #b8b8b8;
+  color: #202020;
 }
 
 .login-info-box h2 {
   font-size: 24px;
-  color: #b8b8b8;
+  color: #202020;
   font-weight: bolder;
   margin-bottom: 40px;
 }
 
 .login-info-box h3 {
   font-size: 20px;
-  color: #b8b8b8;
+  color: #202020;
   margin-bottom: 40px;
 }
 
@@ -392,7 +392,7 @@ const registerSubmit = async () => {
   width: 100%;
   background-color: transparent;
   box-shadow: none;
-  border: 1px solid #b8b8b8;
+  border: 1px solid #202020;
   border-radius: 2px;
   height: 25px;
 }
@@ -405,19 +405,19 @@ const registerSubmit = async () => {
   position: absolute;
   text-align: left;
   font-family: 'Mukta', sans-serif;
-  color: #b8b8b8;
+  color: #202020;
 }
 
 .register-info-box h2 {
   font-size: 24px;
-  color: #b8b8b8;
+  color: #202020;
   font-weight: bolder;
   margin-bottom: 40px;
 }
 
 .register-info-box h3 {
   font-size: 20px;
-  color: #b8b8b8;
+  color: #202020;
   margin-bottom: 40px;
 }
 
@@ -426,7 +426,7 @@ const registerSubmit = async () => {
   width: 100%;
   background-color: transparent;
   box-shadow: none;
-  border: 1px solid #b8b8b8;
+  border: 1px solid #202020;
   border-radius: 2px;
   height: 25px;
 }

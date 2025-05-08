@@ -190,6 +190,7 @@ const fetchUserUpdate = async (body) => {
   })
   return data
 }
+
 //提交投诉
 const fetchFeedBack = async (body) => {
   const { data } = await http({
@@ -228,6 +229,15 @@ const fetchAdminTicketList = async (params) => {
     method: 'GET',
     url: '/api/admin-service/orderList/page',
     params
+  })
+  return data
+}
+//冻结/解冻用户
+const fetchUserFreeze = async (body) => {
+  const { data } = await http({
+    method: 'POST',
+    url: '/api/admin-service/userFreeze',
+    data: body
   })
   return data
 }
@@ -339,6 +349,7 @@ export {
   fetchUserFeedBack,
   fetchComplainList,
   fetchComplainReply,
-  fetchComplainUpdate
+  fetchComplainUpdate,
+  fetchUserFreeze,
 
 }

@@ -57,6 +57,42 @@
     <select id="getOrderCountByUserId" resultType="java.lang.Integer">
         select count(*) from orders where user_id = #{userId}
     </select>
+    <select id="getTodayOrderCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM orders
+        WHERE created_at >= CURDATE()
+        AND  DATE_ADD(CURDATE(), INTERVAL 1 DAY) >created_at
+    </select>
+    <select id="getTodayPassengerCount" resultType="java.lang.Integer">
+        SELECT COUNT(op.passenger_id)
+        FROM daily_train dt
+                 INNER JOIN orders o ON dt.train_id = o.train_id
+                 INNER JOIN order_passengers op ON o.order_id = op.order_id
+        WHERE dt.departure_date = CURDATE()
+    </select>
+    <select id="getPassengerTrend" resultType="com.qdu.dto.resp.admin.PassengerTrendDTO">
+        SELECT
+            DATE_FORMAT(dt.departure_date, '%Y-%m-%d') AS date,
+            COUNT(op.passenger_id) AS count
+        FROM daily_train dt
+            LEFT JOIN orders o ON dt.train_id = o.train_id
+            LEFT JOIN order_passengers op ON o.order_id = op.order_id
+        WHERE dt.departure_date BETWEEN
+            CURDATE() - INTERVAL #{days} DAY AND CURDATE()
+        GROUP BY dt.departure_date
+        ORDER BY dt.departure_date ASC
+    </select>
+    <select id="getOrderTrend" resultType="com.qdu.dto.resp.admin.OrderTrendDTO">
+        SELECT
+        DATE_FORMAT(created_at, '%Y-%m-%d') AS date,
+        COUNT(order_id) AS count
+        FROM orders
+        WHERE created_at >= CURDATE() - INTERVAL #{days} DAY
+        AND  CURDATE() + INTERVAL 1 DAY > created_at
+        AND status != 2
+        GROUP BY DATE(created_at)
+        ORDER BY DATE(created_at) ASC
+    </select>
 
 
 </mapper>

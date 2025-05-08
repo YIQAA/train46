@@ -17,4 +17,18 @@
         FROM users
         WHERE user_id = #{userId}
     </select>
+    <select id="getOneByUserId" resultType="com.qdu.entity.Users">
+        SELECT *
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
+
+
+    <select id="getTodayViewCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM users
+        WHERE last_login_at IS NOT NULL
+        AND last_login_at >= CURDATE()
+        AND DATE_ADD(CURDATE(), INTERVAL 1 DAY) >last_login_at
+    </select>
 </mapper>

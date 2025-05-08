@@ -27,12 +27,12 @@
       <div class="chart-item">
         <div class="chart-container" ref="stationFlowBarChartDom" :style="{ height: '400px', width: '100%' }"></div>
       </div>
-      <div class="chart-item">
-        <div class="chart-container" ref="trainOccupancyBarChartDom" :style="{ height: '400px', width: '100%' }"></div>
-      </div>
-      <div class="chart-item">
-        <div class="chart-container" ref="dailyOrderLineChartDom" :style="{ height: '400px', width: '100%' }"></div>
-      </div>
+<!--      <div class="chart-item">-->
+<!--        <div class="chart-container" ref="trainOccupancyBarChartDom" :style="{ height: '400px', width: '100%' }"></div>-->
+<!--      </div>-->
+<!--      <div class="chart-item">-->
+<!--        <div class="chart-container" ref="dailyOrderLineChartDom" :style="{ height: '400px', width: '100%' }"></div>-->
+<!--      </div>-->
     </div>
   </div>
 </template>
@@ -254,15 +254,15 @@ onMounted(() => {
   stationFlowBarChart = echarts.init(stationFlowBarChartDom.value)
   stationFlowBarChart.setOption(stationFlowBarOptions.value)
 
-  trainOccupancyBarChart = echarts.init(trainOccupancyBarChartDom.value)
-  trainOccupancyBarChart.setOption(trainOccupancyBarOptions.value)
-
-  dailyOrderLineChart = echarts.init(dailyOrderLineChartDom.value)
-  dailyOrderLineChart.setOption(dailyOrderLineOptions.value)
+  // trainOccupancyBarChart = echarts.init(trainOccupancyBarChartDom.value)
+  // trainOccupancyBarChart.setOption(trainOccupancyBarOptions.value)
+  //
+  // dailyOrderLineChart = echarts.init(dailyOrderLineChartDom.value)
+  // dailyOrderLineChart.setOption(dailyOrderLineOptions.value)
 
   window.addEventListener('resize', handleResize)
 
-  setInterval(fetchData, 5000) // 每5秒更新
+  setInterval(fetchData, 10000) // 每10秒更新
   fetchData() // 初始加载
 })
 

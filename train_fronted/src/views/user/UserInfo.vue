@@ -51,7 +51,7 @@
     </div>
     <Divider dashed></Divider>
     <div class="title-wrapper">
-      <TypographyTitle :level="5">附加信息</TypographyTitle>
+      <TypographyTitle :level="5">保险订单</TypographyTitle>
     </div>
 
     <div>
@@ -132,10 +132,11 @@ const state = reactive({
     }
   ],
   editUserInfoMap: [
-    { label: '联系电话', value: undefined, name: 'phone', require: true },
-    { label: '邮箱', value: undefined, name: 'mail' },
-    { label: '地址', value: undefined, name: 'address' },
-    { label: '邮编', value: undefined, name: 'postCode' }
+    { label: '联系电话', value: undefined, name: 'phone', require: true }
+    // ,
+    // { label: '邮箱', value: undefined, name: 'mail' },
+    // { label: '地址', value: undefined, name: 'address' },
+    // { label: '邮编', value: undefined, name: 'postCode' }
   ]
 })
 

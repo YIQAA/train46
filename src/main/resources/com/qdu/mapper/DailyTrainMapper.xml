@@ -8,4 +8,10 @@
         WHERE train_number = #{trainNumber}
           AND departure_date = #{departureDate}
     </select>
+    <select id="getTodayTrainCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM daily_train
+        WHERE departure_date = CURDATE()
+          AND status = 'scheduled'
+    </select>
 </mapper>

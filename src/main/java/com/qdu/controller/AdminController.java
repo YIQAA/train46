@@ -1,8 +1,11 @@
 package com.qdu.controller;
 
 
+import com.qdu.common.convention.result.Result;
+import com.qdu.common.convention.result.Results;
 import com.qdu.common.page.PageResponse;
 import com.qdu.dto.req.admin.StationCreateRepDTO;
+import com.qdu.dto.req.admin.ToggleFreezeUserReqDTO;
 import com.qdu.dto.req.order.TicketOrderPageQueryReqDTO;
 import com.qdu.dto.resp.admin.AdminIndexRespDTO;
 import com.qdu.dto.resp.admin.StationListRespDTO;
@@ -11,6 +14,7 @@ import com.qdu.dto.resp.admin.UserListRespDTO;
 import com.qdu.dto.resp.order.TicketOrderDetailRespDTO;
 import com.qdu.dto.resp.ticketList.TrainStationQueryRespDTO;
 import com.qdu.service.impl.*;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,6 +73,13 @@ public class AdminController {
     public List<UserListRespDTO> getUserList() {
         System.out.println("-----------------查询所有用户-------------------------");
         return userService.getUserList();
+    }
+
+    //冻结/解冻用户
+    @PostMapping("/userFreeze")
+    public Result<Void> toggleFreezeUser(@RequestBody ToggleFreezeUserReqDTO requestParam) {
+        userService.toggleFreezeUser(requestParam);
+        return Results.success();
     }
 
 }

@@ -108,7 +108,7 @@ const messages = ref([
   {
     id: 1,
     type: 'text',
-    content: '您好！我是火车票务助手，请问有什么可以帮您？',
+    content: '您好！我是青大版12306火车票务助手，请问有什么可以帮您？',
     isUser: false
   }
 ]);

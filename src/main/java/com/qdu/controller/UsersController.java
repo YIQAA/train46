@@ -1,5 +1,6 @@
 package com.qdu.controller;
 import com.qdu.common.convention.result.Result;
+import com.qdu.dto.req.admin.ToggleFreezeUserReqDTO;
 import com.qdu.dto.resp.user.UserQueryRespDTO;
 import com.qdu.dto.resp.user.UserRegisterRespDTO;
 import com.qdu.service.impl.UsersServiceImpl;
@@ -38,5 +39,7 @@ public class UsersController {
     public Result<UserQueryRespDTO> queryUserByUsername(@RequestParam("username") @NotEmpty String username) {
         return Results.success(userService.queryUserByUsername(username));
     }
+
+
 
 }

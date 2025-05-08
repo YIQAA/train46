@@ -1,5 +1,6 @@
 package com.qdu.service;
 
+import com.qdu.dto.req.admin.ToggleFreezeUserReqDTO;
 import com.qdu.dto.req.user.UserRegisterReqDTO;
 import com.qdu.dto.resp.admin.UserListRespDTO;
 import com.qdu.dto.resp.ticketList.UserPassengerRespDTO;
@@ -7,6 +8,7 @@ import com.qdu.dto.resp.user.UserQueryRespDTO;
 import com.qdu.dto.resp.user.UserRegisterRespDTO;
 import com.qdu.entity.Users;
 import com.baomidou.mybatisplus.extension.service.IService;
+import jakarta.validation.Valid;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
@@ -36,4 +38,6 @@ public interface IUsersService extends IService<Users> {
     UserQueryRespDTO queryUserByUsername(String username);
 
     List<UserListRespDTO> getUserList();
+
+    void toggleFreezeUser( ToggleFreezeUserReqDTO requestParam);
 }

@@ -1,6 +1,7 @@
 package com.qdu.mapper;
 
 import com.qdu.dto.domain.StationToStationRouteDTO;
+import com.qdu.dto.resp.admin.TrainOccupancyDTO;
 import com.qdu.dto.resp.ticketList.TrainStationQueryRespDTO;
 import com.qdu.entity.Train;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -8,6 +9,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -41,4 +43,6 @@ public interface TrainMapper extends BaseMapper<Train> {
 
     List<TrainStationQueryRespDTO> getTrainStationByTrainNumber(String trainNumber);
 
+
+    List<Map<String, Object>> getSimpleTrainOccupancy();
 }

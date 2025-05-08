@@ -39,10 +39,10 @@
           <template #icon><MoneyCollectOutlined /></template>
           <router-link to="/orderManagement">车票订单管理</router-link>
         </a-menu-item>
-        <a-menu-item key="/">
-          <template #icon><MoneyCollectOutlined /></template>
-          <router-link to="/">保险订单管理</router-link>
-        </a-menu-item>
+<!--        <a-menu-item key="/">-->
+<!--          <template #icon><MoneyCollectOutlined /></template>-->
+<!--          <router-link to="/">保险订单管理</router-link>-->
+<!--        </a-menu-item>-->
         <a-menu-item key="/feedBackManagement">
           <template #icon><MoneyCollectOutlined /></template>
           <router-link to="/feedBackManagement">反馈意见管理</router-link>
