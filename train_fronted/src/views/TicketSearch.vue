@@ -91,6 +91,12 @@ watch(
       })
     }
 )
+// 日期禁用函数
+const disabledDate = (current) => {
+  const today = dayjs().startOf('day')
+  const oneYearLater = today.add(1, 'year')
+  return current && (current < today || current > oneYearLater)
+}
 
 /* 监听查询条件变化，实时过滤车次列表 */
 watch(headSearch, (newValue) => {
@@ -330,8 +336,40 @@ const days = new Array(15)
 //*****************************************************************************
 const handSubmit = () => {
   validate().then(() => {
-    const {fromCity, toCity, departureDate} = toRaw(headSearch)
-    state.loading = true // 开启加载状态
+    const { fromCity, toCity, departureDate } = toRaw(headSearch)
+    state.loading = true
+
+    // 验证城市有效性
+    const isValidFromCity = state.stationList.some(station => station.code === fromCity)
+    const isValidToCity = state.stationList.some(station => station.code === toCity)
+
+    if (!isValidFromCity) {
+      message.error('出发城市不存在')
+      state.loading = false
+      return
+    }
+    if (!isValidToCity) {
+      message.error('到达城市不存在')
+      state.loading = false
+      return
+    }
+
+    // 验证日期有效性
+    const today = dayjs().startOf('day')
+    const selectedDate = departureDate.startOf('day')
+    const maxDate = today.add(1, 'year')
+
+    if (selectedDate.isBefore(today)) {
+      message.error('查询日期不能为过去的日期')
+      state.loading = false
+      return
+    }
+    if (selectedDate.isAfter(maxDate)) {
+      message.error('查询日期不能超过一年范围')
+      state.loading = false
+      return
+    }
+
     // 调用API获取车次数据
     fetchTicketSearch({
       /* 参数处理 */
@@ -361,6 +399,8 @@ const handSubmit = () => {
     }).finally(() => {
       state.loading = false // 关闭加载状态
     })
+  }).catch(() => {
+    state.loading = false
   })
 }
 
@@ -537,6 +577,7 @@ const handleTabChange = (tabKey) => {
                       :style="{ width: '150px' }"
                       :show-arrow="false"
                       :allow-clear="false"
+                      :disabledDate="disabledDate"
                   />
                 </FormItem>
               </Col>

@@ -133,6 +133,31 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+<!--        Gatling性能测试-->
+        <dependency>
+            <groupId>io.gatling.highcharts</groupId>
+            <artifactId>gatling-charts-highcharts</artifactId>
+            <version>3.10.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.gatling</groupId>
+            <artifactId>gatling-app</artifactId>
+            <version>3.10.1</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- 添加 Scala 库依赖 -->
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>2.13.16</version> <!-- 与 Gatling 兼容的版本 -->
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-reflect</artifactId>
+            <version>2.13.16</version>
+        </dependency>
+
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -194,6 +219,46 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <!-- 添加 Scala 编译插件 -->
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+                <version>4.8.1</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                    </execution>
+                    <execution>
+                        <id>test-compile</id>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <phase>process-test-resources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.gatling</groupId>
+                <artifactId>gatling-maven-plugin</artifactId>
+                <version>4.2.1</version>
+                <dependencies>
+                    <!-- 添加 plexus-utils 依赖 -->
+                    <dependency>
+                        <groupId>org.codehaus.plexus</groupId>
+                        <artifactId>plexus-utils</artifactId>
+                        <version>3.4.1</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <simulationsFolder>src/test/scala/simulations</simulationsFolder>
+                    <resultsFolder>target/gatling/results</resultsFolder>
+                    <runMultipleSimulations>true</runMultipleSimulations>
+                </configuration>
             </plugin>
         </plugins>
     </build>

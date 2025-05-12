@@ -53,22 +53,20 @@ public class OpenAiController {
         } catch (Exception e) {
             throw new RuntimeException("Failed to load system prompt template", e);
         }
-
         // 设置系统提示信息，告知AI模型的角色和任务
         this.chatClient = chatClientBuilder.defaultSystem(systemPromptTemplate)
-
-                // 添加默认的顾问，用于处理聊天请求和响应
-                .defaultAdvisors(
-                        // 聊天记忆顾问，用于从聊天记忆中获取上下文信息
-                        new PromptChatMemoryAdvisor(chatMemory),
-                        // 日志顾问，用于记录聊天请求信息
-                        new LoggingAdvisor(),
-                        // 问答顾问，用于从向量存储中检索相关信息
-                        new QuestionAnswerAdvisor(vectorStore, SearchRequest.defaults()) // RAG
-                )
-                // 设置可用的函数，AI模型可以调用这些函数来执行特定任务
-                .defaultFunctions("listTicketPageQueryForAI")
-                .build();
+            // 添加默认的顾问，用于处理聊天请求和响应
+            .defaultAdvisors(
+                // 聊天记忆顾问，用于从聊天记忆中获取上下文信息
+                new PromptChatMemoryAdvisor(chatMemory),
+                // 日志顾问，用于记录聊天请求信息
+                new LoggingAdvisor(),
+                // 问答顾问，用于从向量存储中检索相关信息
+                new QuestionAnswerAdvisor(vectorStore, SearchRequest.defaults()) // RAG
+            )
+            // 设置可用的函数，AI模型可以调用这些函数来执行特定任务
+            .defaultFunctions("listTicketPageQueryForAI")
+            .build();
     }
 
 
@@ -79,12 +77,10 @@ public class OpenAiController {
      */
     @CrossOrigin
     @GetMapping(value = "/generateAnswer", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, Object>> generateAnswer(
-            @RequestParam(value = "message") String message) {
-
+    public ResponseEntity<Map<String, Object>> generateAnswer(@RequestParam(value = "message") String message)
+    {
         Map<String, Object> finalResponse = new LinkedHashMap<>();
         finalResponse.put("timestamp", Instant.now().toString());
-
         try {
             // 调用AI并获取结构化响应
             String aiRawResponse = this.chatClient.prompt()
@@ -93,18 +89,14 @@ public class OpenAiController {
                     .call()
                     .content();
             System.out.println(aiRawResponse);
-
             // 解析AI返回的原始JSON
             Map<String, Object> aiResponse = objectMapper.readValue(aiRawResponse,
                     new TypeReference<Map<String, Object>>() {});
-
             // 统一封装为前端需要的结构
             finalResponse.put("status", "success");
             finalResponse.put("type", aiResponse.get("type"));
             finalResponse.put("content", aiResponse.get("content"));
-
             return ResponseEntity.ok(finalResponse);
-
         } catch (JsonProcessingException e) {
             // AI返回格式错误时的处理
             finalResponse.put("status", "error");
