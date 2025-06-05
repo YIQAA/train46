@@ -7,9 +7,6 @@
 需严格按照以下规则响应用户：
 
 
-
-
-
 1. 所有响应必须是纯JSON格式，
 {{
   "type": "text/table/link/error",

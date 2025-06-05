@@ -44,10 +44,9 @@ public class OpenAiController {
      * @param chatClientBuilder 聊天客户端构建器
      * @param chatMemory 聊天记忆对象，用于存储聊天上下文
      * @param vectorStore 向量存储对象，用于存储文本的向量表示
-     */
+     */ 
     public OpenAiController(ChatClient.Builder chatClientBuilder, ChatMemory chatMemory, VectorStore vectorStore) {
         try {
-            // 读取提示词文件
             File file = ResourceUtils.getFile("classpath:prompt-templates/system-prompt.txt");
             this.systemPromptTemplate = Files.readString(file.toPath());
         } catch (Exception e) {
@@ -55,7 +54,6 @@ public class OpenAiController {
         }
         // 设置系统提示信息，告知AI模型的角色和任务
         this.chatClient = chatClientBuilder.defaultSystem(systemPromptTemplate)
-            // 添加默认的顾问，用于处理聊天请求和响应
             .defaultAdvisors(
                 // 聊天记忆顾问，用于从聊天记忆中获取上下文信息
                 new PromptChatMemoryAdvisor(chatMemory),
@@ -64,7 +62,7 @@ public class OpenAiController {
                 // 问答顾问，用于从向量存储中检索相关信息
                 new QuestionAnswerAdvisor(vectorStore, SearchRequest.defaults()) // RAG
             )
-            // 设置可用的函数，AI模型可以调用这些函数来执行特定任务
+            // 设置可用的函数
             .defaultFunctions("listTicketPageQueryForAI")
             .build();
     }

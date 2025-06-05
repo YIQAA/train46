@@ -17,6 +17,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -33,24 +36,18 @@ public class TicketServiceImpl implements ITicketService {
     private final ISeatService seatService;
     private final RedisTemplate<String, Object> redisTemplate;
 
-    //根据出发城市code，到达城市code，日期  查询 车次车票信息列表
+    //根据出发城市code，到达城市code，日期  查询车次车票信息列表
     public List<TicketListDTO> listTicketQuery(String fromCityCode, String toCityCode, LocalDate departureDate) {
-
         String key = "ticket:query:" + fromCityCode + ":" + toCityCode + ":" + departureDate;
         List<TicketListDTO> dtos = (List<TicketListDTO>) redisTemplate.opsForValue().get(key);
         System.out.println("redis查询车票信息列表");
         if (dtos == null) {
             dtos = new ArrayList<>();
             System.out.println("redis失效，查询车票信息列表");
-            //查询两城市之间的火车信息，因为一个城市可能有多个车站，一条火车路线中，可能包含一个城市的多个站点，
-            // 比如北京南-上海虹桥，北京西-上海虹桥，所以根据两个城市名称可能会查出多条站到站的路线信息
             List<StationToStationRouteDTO> routes = trainService.findTrainsByCityCodes(fromCityCode, toCityCode, departureDate);
-
             for (StationToStationRouteDTO route : routes) {
                 TicketListDTO dto = new TicketListDTO();
-                // 1. 根据车次号和出发日期查询可能重复的 车次id，
                 String trainId = trainService.getTrainIdByNumberAndDate(route.getTrainNumber(), departureDate);
-                // 2. 基础信息封装到TicketListDTO
                 dto.setTrainId(trainId);
                 dto.setTrainNumber(route.getTrainNumber());
                 dto.setTrainType(route.getTrainType());
@@ -61,16 +58,27 @@ public class TicketServiceImpl implements ITicketService {
                 dto.setDuration(convertMinutesToHourMinute(route.getDuration()));
                 dto.setDepartureFlag(route.getDepartureFlag());
                 dto.setArrivalFlag(route.getArrivalFlag());
-                // 3. 根据查到的具体 每日车次id 和 里程  查询  各种座位票价  信息
                 List<TrainSeatsDTO> seats = seatService.selectAvailableSeats(trainId, route.getDistance());
                 dto.setSeatClassList(seats);
-
                 dtos.add(dto);
             }
-            // 将查询结果存入 Redis 缓存，设置缓存时间为 30 分钟
             redisTemplate.opsForValue().set(key, dtos, 30, TimeUnit.MINUTES);
         }
-        return dtos;
+        // 过滤当天已过期的车次
+        LocalDateTime now = LocalDateTime.now();
+        List<TicketListDTO> filteredList = new ArrayList<>();
+        for (TicketListDTO dto : dtos) {
+            try {
+                LocalTime departureTime = LocalTime.parse(dto.getDepartureTime() + ":00");
+                LocalDateTime departureDateTime = departureDate.atTime(departureTime);
+                if (!departureDate.equals(now.toLocalDate()) || departureDateTime.isAfter(now)) {
+                    filteredList.add(dto);
+                }
+            } catch (DateTimeParseException e) {
+                System.err.println("解析出发时间失败：" + dto.getDepartureTime());
+            }
+        }
+        return filteredList;
     }
 
     //余票查询页面     查询车票信息

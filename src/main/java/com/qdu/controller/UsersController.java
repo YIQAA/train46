@@ -27,7 +27,7 @@ public class UsersController {
     private final UsersServiceImpl userService;
 
     @PostMapping("/register")
-    public Result<UserRegisterRespDTO> register(@RequestBody @Valid UserRegisterReqDTO requestParam) {
+    public Result<UserRegisterRespDTO> register(@RequestBody  UserRegisterReqDTO requestParam) {
         return Results.success(userService.register(requestParam));
     }
 

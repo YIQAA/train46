@@ -24,7 +24,6 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     public SecurityConfig(@Lazy  JwtAuthenticationFilter jwtAuthenticationFilter) {
@@ -37,7 +36,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/user-service/register").permitAll() // 添加注册接口到允许匿名访问的列表
                         .requestMatchers("/**").permitAll()
                         .anyRequest().authenticated()
                 )

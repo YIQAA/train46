@@ -51,11 +51,6 @@ public class AIServiceTools {
 	@AllArgsConstructor
 	@Description("车票查询结果")
 	public static class TicketQueryResult {
-//		private List<TicketListDTO> tickets;
-//
-//		private int currentPage;
-//
-//		private int totalPages;
 
 		private int code;
 		private List<AiQueryTicketListDTO> tickets;
@@ -66,14 +61,14 @@ public class AIServiceTools {
 	@Bean
 	@Description("分页查询车票信息函数")
 	public Function<TicketQueryParams, TicketQueryResult> listTicketPageQueryForAI() {
-		System.out.println("+++++++++++++++++++++++++++++BeanForAI   1++++++++++++++++++++++++++++++");
+		System.out.println("BeanForAI   1");
 		return params -> {
 			try {
 				// 参数校验
 				if (params.getDepartureCity() == null || params.getDestinationCity() == null) {
 					return new TicketQueryResult(400, null, "出发地和目的地不能为空");
 				}
-				System.out.println("+++++++++++++++++++++++++++++BeanForAI   2++++++++++++++++++++++++++++++"+params.getDepartureDate());
+				System.out.println("BeanForAI   2"+params.getDepartureDate());
 				// 调用业务Service
 				List<AiQueryTicketListDTO> tickets = aiChatService.listTicketQueryForAIService(
 						params.getDepartureCity(),
